@@ -102,7 +102,11 @@ window.handleAuthSubmit = async function(event) {
       if (error) throw error;
       
       // 1. 強制登出，避免 Supabase 在背景自動登入
-      await supabaseClient.auth.signOut();
+      try {
+        await supabaseClient.auth.signOut();
+      } catch (e) {
+        console.warn('Sign out failed:', e);
+      }
       
       // 2. 顯示註冊成功
       showToast('✅ 註冊成功！請點擊 Login 進行登入', 'success');
@@ -122,7 +126,10 @@ window.handleAuthSubmit = async function(event) {
       document.getElementById('auth-form').reset();
     }
   } catch (error) {
+    console.error('Auth error:', error);
     showToast('錯誤: ' + error.message, 'error');
+    // 如果是註冊失敗等問題，直接用 alert 彈出，確保使用者能看到
+    alert('認證失敗: ' + error.message);
   } finally {
     btn.disabled = false;
     btn.innerText = isSignUpMode ? 'Sign Up' : 'Login';
