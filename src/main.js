@@ -101,9 +101,18 @@ window.handleAuthSubmit = async function(event) {
       const { data, error } = await supabaseClient.auth.signUp({ email, password });
       if (error) throw error;
       
-      showToast('🎉 註冊成功！已為您自動登入。', 'success');
-      closeAuthModal();
-      document.getElementById('auth-form').reset();
+      // 1. 強制登出，避免 Supabase 在背景自動登入
+      await supabaseClient.auth.signOut();
+      
+      // 2. 顯示註冊成功
+      showToast('✅ 註冊成功！請點擊 Login 進行登入', 'success');
+      
+      // 3. 將表單切換回登入模式
+      if (isSignUpMode) toggleAuthMode();
+      
+      // 4. 確保使用者的帳號密碼還留在輸入框中
+      document.getElementById('auth-email').value = email;
+      document.getElementById('auth-password').value = password;
       
     } else {
       const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
