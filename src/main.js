@@ -394,14 +394,29 @@ window.publishToSupabase = async function(event) {
     const previewCanvas = document.createElement('canvas');
     let previewDataUrl;
     
+    // 計算縮圖尺寸 (最大 800px)
+    const MAX_SIZE = 800;
+    let width = currentImageObj.width;
+    let height = currentImageObj.height;
+    if (width > MAX_SIZE || height > MAX_SIZE) {
+      if (width > height) {
+        height = Math.round((height * MAX_SIZE) / width);
+        width = MAX_SIZE;
+      } else {
+        width = Math.round((width * MAX_SIZE) / height);
+        height = MAX_SIZE;
+      }
+    }
+    previewCanvas.width = width;
+    previewCanvas.height = height;
+    const pCtx = previewCanvas.getContext('2d');
+    
     if (currentFilter.lut_url || currentFilter.lut_obj) {
-      previewDataUrl = document.getElementById('filtered-canvas').toDataURL('image/jpeg', 0.8);
+      pCtx.drawImage(document.getElementById('filtered-canvas'), 0, 0, width, height);
+      previewDataUrl = previewCanvas.toDataURL('image/jpeg', 0.8);
     } else {
-      const pCtx = previewCanvas.getContext('2d');
-      previewCanvas.width = currentImageObj.width;
-      previewCanvas.height = currentImageObj.height;
       if (currentFilter.css !== 'none') pCtx.filter = currentFilter.css;
-      pCtx.drawImage(currentImageObj, 0, 0);
+      pCtx.drawImage(currentImageObj, 0, 0, width, height);
       previewDataUrl = previewCanvas.toDataURL('image/jpeg', 0.8);
     }
 
