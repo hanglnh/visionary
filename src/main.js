@@ -346,15 +346,12 @@ function renderSkeletons() {
 }
 
 function renderMockFeed() {
+  const base = import.meta.env.BASE_URL;
   allPosts = [
-    { preset_name: 'Midnight Neon', author_ig: 'cyber_shooter_tw', filter_css: 'contrast(1.4) saturate(1.8) hue-rotate(20deg) brightness(0.85)', preview_url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?q=80&w=1000' },
-    { preset_name: 'Wong Kar-wai Vibes', author_ig: 'film.diary.hk', filter_css: 'contrast(1.1) saturate(1.2) sepia(0.4) hue-rotate(-25deg) brightness(0.9)', preview_url: 'https://images.unsplash.com/photo-1517685633466-403d6955aeab?q=80&w=1000' },
-    { preset_name: 'Sakura Dream', author_ig: 'photo.tokyo', filter_css: 'contrast(0.9) saturate(1.4) hue-rotate(10deg) brightness(1.1)', preview_url: 'https://images.unsplash.com/photo-1551009175-8a68da93d5f9?q=80&w=1000' },
-    { preset_name: 'Golden Hour', author_ig: 'sunset_lover', filter_css: 'contrast(1.05) saturate(1.3) sepia(0.2) hue-rotate(-10deg) brightness(1.05)', preview_url: 'https://images.unsplash.com/photo-1472806426350-603610d85659?q=80&w=1000' },
-    { preset_name: 'Cyberpunk City', author_ig: 'neo_tokyo_lights', filter_css: 'contrast(1.5) saturate(2) hue-rotate(45deg) brightness(0.8)', preview_url: 'https://images.unsplash.com/photo-1601042879364-f3947d3f9c16?q=80&w=1000' },
-    { preset_name: 'Vintage Film', author_ig: 'analog.soul', filter_css: 'contrast(0.85) saturate(0.8) sepia(0.5) brightness(1.1)', preview_url: 'https://images.unsplash.com/photo-1518599904199-0ca897819ddb?q=80&w=1000' },
-    { preset_name: 'Cold Morning', author_ig: 'minimal.tones', filter_css: 'contrast(1.1) saturate(0.7) hue-rotate(180deg) brightness(1.1)', preview_url: 'https://images.unsplash.com/photo-1444491741275-3747c53c99b4?q=80&w=1000' },
-    { preset_name: 'Desert Warmth', author_ig: 'nomad.lens', filter_css: 'contrast(1.2) saturate(1.5) sepia(0.3) brightness(0.95)', preview_url: 'https://images.unsplash.com/photo-1509316785289-025f5b846b35?q=80&w=1000' }
+    { preset_name: 'Midnight Neon', author_ig: 'cyber_shooter_tw', filter_css: 'contrast(1.4) saturate(1.8) hue-rotate(20deg) brightness(0.85)', preview_url: base + 'images/midnight_neon.png' },
+    { preset_name: 'Wong Kar-wai Vibes', author_ig: 'film.diary.hk', filter_css: 'contrast(1.1) saturate(1.2) sepia(0.4) hue-rotate(-25deg) brightness(0.9)', preview_url: base + 'images/wong_kar_wai.png' },
+    { preset_name: 'Sakura Dream', author_ig: 'photo.tokyo', filter_css: 'contrast(0.9) saturate(1.4) hue-rotate(10deg) brightness(1.1)', preview_url: base + 'images/sakura_dream.png' },
+    { preset_name: 'Golden Hour', author_ig: 'sunset_lover', filter_css: 'contrast(1.05) saturate(1.3) sepia(0.2) hue-rotate(-10deg) brightness(1.05)', preview_url: base + 'images/golden_hour.png' }
   ];
   renderFeedUI(allPosts);
 }
