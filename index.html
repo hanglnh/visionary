@@ -62,8 +62,10 @@
       <!-- Hero 背景圖片 (淡入淡出效果) -->
       <div class="absolute top-[-5rem] left-1/2 -translate-x-1/2 w-[100vw] h-[700px] sm:h-[900px] pointer-events-none z-[-1]">
         <div class="absolute inset-0 bg-[url('/visionary/images/background.jpg')] bg-cover bg-center bg-no-repeat opacity-60 mix-blend-luminosity"></div>
-        <!-- 僅在底部保留漸層淡出，讓圖片可見面積最大化 -->
-        <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/30 to-transparent"></div>
+        <!-- 輕微的邊緣黑影 (Vignette)，不誇張地增加電影感 -->
+        <div class="absolute inset-0 bg-gradient-to-b from-zinc-950/60 via-transparent via-20% to-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 via-30% to-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-zinc-950/40 via-transparent via-10% to-zinc-950/40 to-90%"></div>
       </div>
       <div class="text-center max-w-4xl mx-auto px-4 mb-20">
         <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800 text-cyan-400 text-sm font-bold tracking-widest mb-8">
