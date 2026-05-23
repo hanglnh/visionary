@@ -432,7 +432,8 @@ window.publishToSupabase = async function(event) {
 
     closeShareModal();
     showToast('🎉 發布成功！您的專屬調色已上線。', 'success');
-    document.getElementById('share-form').reset();
+    document.getElementById('share-name').value = '';
+    document.getElementById('share-ig').value = '';
     
     switchTab('explore');
     await fetchCommunityPosts();
