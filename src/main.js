@@ -326,7 +326,7 @@ function showToast(msg, type = 'success') {
   const c = cfg[type] || cfg.success;
   text.textContent = msg;
   icon.setAttribute('data-lucide', c.icon);
-  icon.className = `w-5 h-5 flex-shrink-0 ${c.color}`;
+  icon.setAttribute('class', `w-5 h-5 flex-shrink-0 ${c.color}`);
   initIcons();
 
   toast.classList.remove('translate-y-16', 'opacity-0');
