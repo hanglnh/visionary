@@ -376,7 +376,7 @@ function renderFeedUI(posts) {
           </p>
           <div class="flex gap-2">
             <button onclick="tryCommunityPreset('${post.filter_css}', '${post.preset_name}')" class="flex-1 bg-white text-black py-2.5 rounded-lg font-bold text-sm hover:bg-rose-400 hover:text-white transition-colors">Try Preset</button>
-            <a href="https://instagram.com/${post.author_ig}" target="_blank" class="px-4 py-2.5 bg-zinc-800 rounded-lg flex items-center justify-center hover:bg-rose-600 transition-colors">
+            <a href="https://www.instagram.com/dls.film?igsh=MXU2NGoweG5uc3czeA%3D%3D&utm_source=qr" target="_blank" class="px-4 py-2.5 bg-zinc-800 rounded-lg flex items-center justify-center hover:bg-rose-600 transition-colors">
               <i data-lucide="instagram" class="w-5 h-5"></i>
             </a>
           </div>
