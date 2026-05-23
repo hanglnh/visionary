@@ -178,6 +178,7 @@
 
         <div id="preview-box" class="w-full max-w-4xl flex-col items-center hidden">
           <div class="relative w-full aspect-[4/3] sm:aspect-video bg-black rounded-lg overflow-hidden ring-1 ring-white/10 shadow-2xl">
+            <canvas id="filtered-canvas" class="absolute inset-0 w-full h-full object-contain hidden"></canvas>
             <img id="filtered-img" class="absolute inset-0 w-full h-full object-contain" alt="Filtered preview of your photo">
             <img id="original-img" class="absolute inset-0 w-full h-full object-contain" alt="Original uploaded photo">
             <input type="range" id="slider" aria-label="Before and after comparison slider" min="0" max="100" value="50" class="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-20 m-0" oninput="updateSlider()">
@@ -207,9 +208,20 @@
       </div>
       
       <div id="filter-controls" class="w-full max-w-3xl mt-12 opacity-40 pointer-events-none transition-opacity duration-300">
-        <div class="flex items-center gap-2 mb-4 px-2">
-          <i data-lucide="sliders" class="w-4 h-4 text-zinc-400"></i>
-          <h3 class="text-sm font-semibold tracking-wider text-zinc-400 uppercase">Apply Presets</h3>
+        <div class="flex items-center justify-between mb-4 px-2">
+          <div class="flex items-center gap-2">
+            <i data-lucide="sliders" class="w-4 h-4 text-zinc-400"></i>
+            <h3 class="text-sm font-semibold tracking-wider text-zinc-400 uppercase">Apply Presets</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="downloadLutTemplate()" class="text-xs font-bold bg-transparent hover:bg-zinc-800 text-zinc-400 hover:text-zinc-300 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 border border-zinc-700">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i> Get Template
+            </button>
+            <button onclick="document.getElementById('lut-input').click()" class="text-xs font-bold bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 border border-zinc-700">
+              <i data-lucide="upload" class="w-3.5 h-3.5"></i> Upload LUT (.png)
+            </button>
+          </div>
+          <input type="file" id="lut-input" class="hidden" onchange="handleLutUpload(event)">
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="system-filters-container"></div>
       </div>

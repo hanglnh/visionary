@@ -1,6 +1,7 @@
 import './style.css';
 import { createClient } from '@supabase/supabase-js';
 import { createIcons, icons } from 'lucide';
+import { WebGLLutFilter } from './webgl-lut.js';
 
 // 1. 初始化圖示
 function initIcons() { createIcons({ icons }); }
@@ -28,6 +29,9 @@ const SYSTEM_FILTERS = [
 ];
 
 let currentImageDataUrl = null;
+let currentImageObj = null;
+let webglFilter = null;
+let currentLutFile = null;
 let currentFilter = SYSTEM_FILTERS[0];
 let allPosts = [];
 let loggedInUser = null;
@@ -192,37 +196,97 @@ function loadImageFile(file) {
     document.getElementById('original-img').src = currentImageDataUrl;
     document.getElementById('filtered-img').src = currentImageDataUrl;
     
-    document.getElementById('upload-box').classList.add('hidden');
-    document.getElementById('preview-box').classList.remove('hidden');
-    document.getElementById('preview-box').classList.add('flex');
-    document.getElementById('filter-controls').classList.remove('opacity-40', 'pointer-events-none');
-    
-    document.getElementById('slider').value = 50;
-    updateSlider();
-    applyFilter(SYSTEM_FILTERS[0]);
-    showToast('照片載入成功！', 'success');
+    currentImageObj = new Image();
+    currentImageObj.onload = () => {
+      document.getElementById('upload-box').classList.add('hidden');
+      document.getElementById('preview-box').classList.remove('hidden');
+      document.getElementById('preview-box').classList.add('flex');
+      document.getElementById('filter-controls').classList.remove('opacity-40', 'pointer-events-none');
+      
+      if (!webglFilter) {
+        const canvas = document.getElementById('filtered-canvas');
+        webglFilter = new WebGLLutFilter(canvas);
+      }
+      
+      document.getElementById('slider').value = 50;
+      updateSlider();
+      applyFilter(SYSTEM_FILTERS[0]);
+      showToast('照片載入成功！', 'success');
+    };
+    currentImageObj.src = currentImageDataUrl;
   };
   reader.readAsDataURL(file);
 }
 
+window.handleLutUpload = function(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const lutImg = new Image();
+    lutImg.onload = () => {
+      // 驗證是否為標準 512x512 HaldCLUT
+      if (lutImg.width !== 512 || lutImg.height !== 512) {
+        showToast(`格式錯誤：請上傳標準的 512x512 HaldCLUT。您上傳的是 ${lutImg.width}x${lutImg.height}`, 'error');
+        return;
+      }
+      
+      currentLutFile = file; // Save for uploading to Supabase
+      const customFilter = { 
+        id: 'custom_lut', 
+        name: 'Custom LUT', 
+        css: 'none', 
+        color: 'border-purple-500 text-purple-500',
+        lut_obj: lutImg 
+      };
+      applyFilter(customFilter);
+      showToast('自訂 LUT 色票套用成功！', 'success');
+      event.target.value = ''; // Reset input
+    };
+    lutImg.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+};
+
+window.downloadLutTemplate = function() {
+  const base = import.meta.env.BASE_URL;
+  const url = base + 'images/neutral_haldclut.png';
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'neutral_haldclut.png';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  showToast('基準色票下載成功！', 'success');
+};
+
 /* ================= 圖片下載邏輯 ================= */
 window.downloadImage = function() {
   if (!currentImageDataUrl) return;
-  const canvas = document.createElement('canvas');
-  const img = new Image();
-  img.onload = () => {
-    canvas.width = img.naturalWidth;
-    canvas.height = img.naturalHeight;
-    const ctx = canvas.getContext('2d');
-    if (currentFilter.css && currentFilter.css !== 'none') ctx.filter = currentFilter.css;
-    ctx.drawImage(img, 0, 0);
-    const a = document.createElement('a');
-    a.download = `visionary_${currentFilter.name.replace(/[^a-z0-9]/gi,'_').toLowerCase()}_${Date.now()}.jpg`;
+  const a = document.createElement('a');
+  a.download = `visionary_${currentFilter.name.replace(/[^a-z0-9]/gi,'_').toLowerCase()}_${Date.now()}.jpg`;
+
+  if (currentFilter.lut_url || currentFilter.lut_obj) {
+    const canvas = document.getElementById('filtered-canvas');
     a.href = canvas.toDataURL('image/jpeg', 0.95);
     a.click();
     showToast('圖片下載成功！', 'success');
-  };
-  img.src = currentImageDataUrl;
+  } else {
+    const canvas = document.createElement('canvas');
+    const img = new Image();
+    img.onload = () => {
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d');
+      if (currentFilter.css && currentFilter.css !== 'none') ctx.filter = currentFilter.css;
+      ctx.drawImage(img, 0, 0);
+      a.href = canvas.toDataURL('image/jpeg', 0.95);
+      a.click();
+      showToast('圖片下載成功！', 'success');
+    };
+    img.src = currentImageDataUrl;
+  }
 };
 
 /* ================= 搜尋與社群牆邏輯 ================= */
@@ -322,18 +386,42 @@ window.publishToSupabase = async function(event) {
   initIcons();
 
   try {
-    const response  = await fetch(currentImageDataUrl);
-    const blob      = await response.blob();
-    const fileName  = `preset_${Date.now()}.jpg`;
+    const previewCanvas = document.createElement('canvas');
+    let previewDataUrl;
+    
+    if (currentFilter.lut_url || currentFilter.lut_obj) {
+      previewDataUrl = document.getElementById('filtered-canvas').toDataURL('image/jpeg', 0.8);
+    } else {
+      const pCtx = previewCanvas.getContext('2d');
+      previewCanvas.width = currentImageObj.width;
+      previewCanvas.height = currentImageObj.height;
+      if (currentFilter.css !== 'none') pCtx.filter = currentFilter.css;
+      pCtx.drawImage(currentImageObj, 0, 0);
+      previewDataUrl = previewCanvas.toDataURL('image/jpeg', 0.8);
+    }
 
-    const { error: uploadError } = await supabaseClient.storage.from('preview_images').upload(fileName, blob, { contentType: 'image/jpeg' });
+    const previewRes = await fetch(previewDataUrl);
+    const previewBlob = await previewRes.blob();
+    const previewFileName = `preview_${Date.now()}.jpg`;
+
+    const { error: uploadError } = await supabaseClient.storage.from('preview_images').upload(previewFileName, previewBlob, { contentType: 'image/jpeg' });
     if (uploadError) throw uploadError;
 
-    const { data: urlData } = supabaseClient.storage.from('preview_images').getPublicUrl(fileName);
+    const { data: urlData } = supabaseClient.storage.from('preview_images').getPublicUrl(previewFileName);
+
+    let lutUrl = null;
+    if (currentLutFile && (currentFilter.id === 'custom_lut')) {
+      const lutFileName = `lut_${Date.now()}.png`;
+      const { error: lutUploadError } = await supabaseClient.storage.from('luts').upload(lutFileName, currentLutFile, { contentType: 'image/png' });
+      if (lutUploadError) throw lutUploadError;
+      const { data: lutUrlData } = supabaseClient.storage.from('luts').getPublicUrl(lutFileName);
+      lutUrl = lutUrlData.publicUrl;
+    }
 
     const { error: dbError } = await supabaseClient.from('community_posts').insert([{
       preset_name: name, author_ig: ig.replace('@', ''),
-      filter_css: currentFilter.css, preview_url: urlData.publicUrl
+      filter_css: currentFilter.css, preview_url: urlData.publicUrl,
+      lut_url: lutUrl
     }]);
     if (dbError) throw dbError;
 
@@ -383,10 +471,12 @@ function renderMockFeed() {
 
 function renderFeedUI(posts) {
   document.getElementById('no-results').classList.add('hidden');
-  document.getElementById('community-feed').innerHTML = posts.map(post => `
+  document.getElementById('community-feed').innerHTML = posts.map(post => {
+    const lutUrlArg = post.lut_url ? `'${post.lut_url}'` : 'null';
+    return `
     <div class="group relative bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-800 hover:border-zinc-600 transition-colors">
       <div class="aspect-[4/5] relative overflow-hidden bg-zinc-950">
-        <img src="${post.preview_url}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" style="filter: ${post.filter_css}" loading="lazy">
+        <img src="${post.preview_url}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" style="filter: ${post.filter_css || 'none'}" loading="lazy">
         <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent opacity-80"></div>
         <div class="absolute bottom-0 left-0 right-0 p-5">
           <h3 class="text-xl font-bold mb-1">${post.preset_name}</h3>
@@ -394,15 +484,15 @@ function renderFeedUI(posts) {
             <i data-lucide="instagram" class="w-3.5 h-3.5"></i> ${post.author_ig}
           </p>
           <div class="flex gap-2">
-            <button onclick="tryCommunityPreset('${post.filter_css}', '${post.preset_name}')" class="flex-1 bg-white text-black py-2.5 rounded-lg font-bold text-sm hover:bg-rose-400 hover:text-white transition-colors">Try Preset</button>
-            <a href="https://www.instagram.com/dls.film?igsh=MXU2NGoweG5uc3czeA%3D%3D&utm_source=qr" target="_blank" class="px-4 py-2.5 bg-zinc-800 rounded-lg flex items-center justify-center hover:bg-rose-600 transition-colors">
+            <button onclick="tryCommunityPreset('${post.filter_css}', '${post.preset_name}', ${lutUrlArg})" class="flex-1 bg-white text-black py-2.5 rounded-lg font-bold text-sm hover:bg-rose-400 hover:text-white transition-colors">Try Preset</button>
+            <a href="https://www.instagram.com/${post.author_ig}" target="_blank" class="px-4 py-2.5 bg-zinc-800 rounded-lg flex items-center justify-center hover:bg-rose-600 transition-colors">
               <i data-lucide="instagram" class="w-5 h-5"></i>
             </a>
           </div>
         </div>
       </div>
     </div>
-  `).join('');
+  `}).join('');
   initIcons();
 }
 
@@ -441,7 +531,30 @@ function renderSystemFilters() {
 
 window.applyFilter = function(idOrObj) {
   currentFilter = typeof idOrObj === 'string' ? SYSTEM_FILTERS.find(f => f.id === idOrObj) : idOrObj;
-  document.getElementById('filtered-img').style.filter = currentFilter.css;
+  
+  const filteredImg = document.getElementById('filtered-img');
+  const filteredCanvas = document.getElementById('filtered-canvas');
+  
+  if (currentFilter.lut_url || currentFilter.lut_obj) {
+    filteredImg.classList.add('hidden');
+    filteredCanvas.classList.remove('hidden');
+    
+    if (currentFilter.lut_obj && currentImageObj) {
+      webglFilter.render(currentImageObj, currentFilter.lut_obj);
+    } else if (currentFilter.lut_url && currentImageObj) {
+      const lutImg = new Image();
+      lutImg.crossOrigin = 'anonymous';
+      lutImg.onload = () => {
+        currentFilter.lut_obj = lutImg;
+        webglFilter.render(currentImageObj, lutImg);
+      };
+      lutImg.src = currentFilter.lut_url;
+    }
+  } else {
+    filteredCanvas.classList.add('hidden');
+    filteredImg.classList.remove('hidden');
+    filteredImg.style.filter = currentFilter.css;
+  }
   
   document.getElementById('share-btn').disabled = (currentFilter.id === 'normal');
   
@@ -450,8 +563,15 @@ window.applyFilter = function(idOrObj) {
   if (activeBtn) activeBtn.className = `filter-option relative rounded-xl bg-zinc-800 border-2 py-5 font-bold text-sm transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)] ${currentFilter.color}`;
 };
 
-window.tryCommunityPreset = function(cssStr, name) {
-  const customFilter = { id: 'custom', name: name, css: cssStr, color: 'border-purple-500 text-purple-500' };
+window.tryCommunityPreset = function(cssStr, name, lutUrl) {
+  const customFilter = { 
+    id: 'community_preset', 
+    name: name, 
+    css: cssStr || 'none', 
+    color: 'border-purple-500 text-purple-500',
+    lut_url: lutUrl
+  };
+  currentLutFile = null; 
   switchTab('studio');
   if (currentImageDataUrl) {
     applyFilter(customFilter);
@@ -464,6 +584,7 @@ window.tryCommunityPreset = function(cssStr, name) {
 
 window.clearImage = function() {
   currentImageDataUrl = null;
+  currentImageObj = null;
   document.getElementById('file-input').value = "";
   document.getElementById('upload-box').classList.remove('hidden');
   document.getElementById('preview-box').classList.add('hidden');
