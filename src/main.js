@@ -250,7 +250,7 @@ window.handleLutUpload = function(event) {
 };
 
 window.downloadLutTemplate = function() {
-  const base = import.meta.env.BASE_URL;
+  const base = typeof import.meta.env !== 'undefined' ? import.meta.env.BASE_URL : '';
   const url = base + 'images/neutral_haldclut.png';
   const a = document.createElement('a');
   a.href = url;
@@ -341,21 +341,26 @@ function showToast(msg, type = 'success') {
 /* ================= Supabase 發布邏輯 ================= */
 async function fetchCommunityPosts() {
   renderSkeletons();
-  const { data, error } = await supabaseClient.from('community_posts').select('*').limit(50);
-  
-  if (error) {
-    if (error.code === '42501') showToast('資料庫權限錯誤 (42501)，切換為模擬資料', 'warn');
-    renderMockFeed();
-    return;
-  }
-  
-  if (!data || data.length === 0) {
-    renderMockFeed();
-    return;
-  }
+  try {
+    const { data, error } = await supabaseClient.from('community_posts').select('*').limit(50);
+    
+    if (error) {
+      if (error.code === '42501') showToast('資料庫權限錯誤 (42501)，切換為模擬資料', 'warn');
+      renderMockFeed();
+      return;
+    }
+    
+    if (!data || data.length === 0) {
+      renderMockFeed();
+      return;
+    }
 
-  allPosts = data.reverse();
-  renderFeedUI(allPosts);
+    allPosts = data.reverse();
+    renderFeedUI(allPosts);
+  } catch (err) {
+    console.error("fetchCommunityPosts error:", err);
+    renderMockFeed();
+  }
 }
 
 window.openShareModal = function() { 
@@ -459,7 +464,7 @@ function renderSkeletons() {
 }
 
 function renderMockFeed() {
-  const base = import.meta.env.BASE_URL;
+  const base = typeof import.meta.env !== 'undefined' ? import.meta.env.BASE_URL : '';
   allPosts = [
     { preset_name: 'Midnight Neon', author_ig: 'cyber_shooter_tw', filter_css: 'contrast(1.4) saturate(1.8) hue-rotate(20deg) brightness(0.85)', preview_url: base + 'images/midnight_neon.png' },
     { preset_name: 'Wong Kar-wai Vibes', author_ig: 'film.diary.hk', filter_css: 'contrast(1.1) saturate(1.2) sepia(0.4) hue-rotate(-25deg) brightness(0.9)', preview_url: base + 'images/wong_kar_wai.png' },
