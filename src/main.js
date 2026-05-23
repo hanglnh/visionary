@@ -265,6 +265,12 @@ async function fetchCommunityPosts() {
     renderMockFeed();
     return;
   }
+  
+  if (!data || data.length === 0) {
+    renderMockFeed();
+    return;
+  }
+
   allPosts = data.reverse();
   renderFeedUI(allPosts);
 }
