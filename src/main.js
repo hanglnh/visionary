@@ -210,7 +210,7 @@ function loadImageFile(file) {
       
       document.getElementById('slider').value = 50;
       updateSlider();
-      applyFilter(SYSTEM_FILTERS[0]);
+      applyFilter(currentFilter);
       showToast('照片載入成功！', 'success');
     };
     currentImageObj.src = currentImageDataUrl;
