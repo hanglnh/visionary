@@ -525,7 +525,14 @@ window.switchTab = function(tabName) {
     const tabBtn = document.getElementById(`tab-${tab}`);
     tabBtn.className = `tab-btn flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 rounded-full text-sm font-bold text-zinc-500 hover:text-zinc-300 transition-all`;
     tabBtn.setAttribute('aria-selected', 'false');
+    
+    // Mobile tab reset
+    const mobileBtn = document.getElementById(`tab-${tab}-mobile`);
+    if (mobileBtn) {
+      mobileBtn.className = 'mobile-tab-btn flex flex-col items-center p-2 text-zinc-500 transition-colors';
+    }
   });
+  
   const targetEl = document.getElementById(`section-${tabName}`);
   targetEl.classList.remove('hidden');
   targetEl.classList.add('flex');
@@ -534,6 +541,13 @@ window.switchTab = function(tabName) {
   let colorClass = tabName === 'studio' ? 'bg-zinc-800 text-cyan-400 shadow-lg' : (tabName === 'explore' ? 'bg-zinc-800 text-rose-400 shadow-lg' : 'bg-zinc-800 text-white shadow-lg');
   targetBtn.className = `tab-btn flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 rounded-full text-sm font-bold transition-all ${colorClass}`;
   targetBtn.setAttribute('aria-selected', 'true');
+  
+  // Mobile tab active state
+  const targetMobileBtn = document.getElementById(`tab-${tabName}-mobile`);
+  if (targetMobileBtn) {
+    let mobileColorClass = tabName === 'studio' ? 'text-cyan-400' : (tabName === 'explore' ? 'text-rose-400' : 'text-white');
+    targetMobileBtn.className = `mobile-tab-btn flex flex-col items-center p-2 transition-colors ${mobileColorClass}`;
+  }
   
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };

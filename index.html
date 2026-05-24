@@ -20,13 +20,13 @@
   <header class="sticky top-0 px-4 sm:px-6 py-4 border-b border-white/10 flex justify-between items-center z-50 backdrop-blur-xl bg-zinc-950/40">
     <div class="flex items-center gap-2">
       <i data-lucide="camera" class="w-6 h-6 text-cyan-400"></i>
-      <h1 class="text-xl font-bold tracking-widest uppercase hidden md:block">
+      <h1 class="text-lg sm:text-xl md:text-2xl font-bold tracking-widest uppercase">
         Visionary<span class="text-cyan-400">.</span>
       </h1>
     </div>
 
-    <!-- 分頁切換 -->
-    <div class="flex bg-zinc-900 rounded-full p-1 border border-zinc-800" role="tablist">
+    <!-- 分頁切換 (Desktop) -->
+    <div class="hidden sm:flex bg-zinc-900 rounded-full p-1 border border-zinc-800" role="tablist">
       <button onclick="switchTab('home')" id="tab-home" role="tab" aria-selected="true" aria-controls="section-home" class="tab-btn flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 rounded-full text-sm font-bold bg-zinc-800 text-white shadow-lg transition-all">
         <i data-lucide="home" class="w-4 h-4"></i> <span class="hidden sm:inline">Home</span>
       </button>
@@ -51,8 +51,25 @@
           <i data-lucide="log-out" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Logout</span>
         </button>
       </div>
+      </div>
     </div>
   </header>
+
+  <!-- ================= 手機版底部導覽列 ================= -->
+  <nav class="sm:hidden fixed bottom-0 left-0 right-0 bg-zinc-950/90 backdrop-blur-xl border-t border-white/10 z-50 px-2 py-2 flex justify-around pb-safe">
+    <button onclick="switchTab('home')" id="tab-home-mobile" class="mobile-tab-btn flex flex-col items-center p-2 text-white">
+      <i data-lucide="home" class="w-5 h-5 mb-1"></i>
+      <span class="text-[10px] font-bold">Home</span>
+    </button>
+    <button onclick="switchTab('studio')" id="tab-studio-mobile" class="mobile-tab-btn flex flex-col items-center p-2 text-zinc-500">
+      <i data-lucide="sliders" class="w-5 h-5 mb-1"></i>
+      <span class="text-[10px] font-bold">Studio</span>
+    </button>
+    <button onclick="switchTab('explore')" id="tab-explore-mobile" class="mobile-tab-btn flex flex-col items-center p-2 text-zinc-500">
+      <i data-lucide="compass" class="w-5 h-5 mb-1"></i>
+      <span class="text-[10px] font-bold">Explore</span>
+    </button>
+  </nav>
 
   <main class="max-w-6xl mx-auto px-4 py-8 relative z-10">
     
@@ -72,7 +89,7 @@
           <i data-lucide="sparkles" class="w-4 h-4"></i>
           <span>NEXT-GEN COLOR GRADING</span>
         </div>
-        <h2 class="text-5xl sm:text-7xl font-extrabold tracking-tighter mb-6 leading-tight text-white drop-shadow-2xl">
+        <h2 class="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tighter mb-6 leading-tight text-white drop-shadow-2xl">
           CINEMATIC TONES.<br/>IN YOUR BROWSER.
         </h2>
         <p class="text-zinc-400 text-lg sm:text-xl leading-relaxed max-w-2xl mx-auto mb-10">
@@ -192,11 +209,11 @@
             <div class="absolute top-4 right-4 bg-black/60 backdrop-blur px-3 py-1 rounded text-xs font-bold tracking-widest text-cyan-400 z-10">AFTER</div>
           </div>
           
-          <div class="flex gap-4 mt-6 flex-wrap justify-center w-full">
+          <div class="flex flex-col sm:flex-row gap-4 mt-6 w-full">
             <button onclick="clearImage()" class="px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors flex items-center gap-2">
               <i data-lucide="trash-2" class="w-4 h-4"></i> Clear
             </button>
-            <div class="flex-1"></div>
+            <div class="hidden sm:block flex-1"></div>
             <button onclick="downloadImage()" id="download-btn" class="px-6 py-2.5 rounded-lg text-sm font-bold bg-zinc-100 hover:bg-white text-black transition-colors flex items-center gap-2">
               <i data-lucide="download" class="w-4 h-4"></i> Download JPG
             </button>
@@ -208,7 +225,7 @@
       </div>
       
       <div id="filter-controls" class="w-full max-w-3xl mt-12 opacity-40 pointer-events-none transition-opacity duration-300">
-        <div class="flex items-center justify-between mb-4 px-2">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 px-2">
           <div class="flex items-center gap-2">
             <i data-lucide="sliders" class="w-4 h-4 text-zinc-400"></i>
             <h3 class="text-sm font-semibold tracking-wider text-zinc-400 uppercase">Apply Presets</h3>
@@ -310,7 +327,7 @@
   </div>
 
   <!-- ================= Toast 浮動通知 ================= -->
-  <div id="toast" class="fixed bottom-6 right-6 z-[200] translate-y-16 opacity-0 pointer-events-none flex items-center gap-3 px-5 py-3.5 rounded-xl bg-zinc-900 border border-zinc-700 shadow-2xl text-sm font-semibold max-w-xs">
+  <div id="toast" class="fixed bottom-20 sm:bottom-6 left-4 right-4 sm:left-auto sm:right-6 z-[200] translate-y-16 opacity-0 pointer-events-none flex items-center gap-3 px-5 py-3.5 rounded-xl bg-zinc-900 border border-zinc-700 shadow-2xl text-sm font-semibold max-w-none sm:max-w-xs">
     <i id="toast-icon" data-lucide="check-circle" class="w-5 h-5 flex-shrink-0 text-cyan-400"></i>
     <span id="toast-msg">Done!</span>
   </div>
