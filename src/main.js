@@ -561,6 +561,7 @@ window.toggleMockMode = async function() {
   const banner = document.getElementById('mock-banner');
   
   if (isMockMode) {
+    showToast('開發者模式啟動！', 'success');
     if (!window.__mswStarted) {
       const { worker } = await import('./mocks/browser.js');
       await worker.start({ onUnhandledRequest: 'bypass' });
@@ -569,6 +570,7 @@ window.toggleMockMode = async function() {
     banner.classList.remove('hidden');
     switchTab('mock-login');
   } else {
+    showToast('已關閉開發者模式', 'success');
     banner.classList.add('hidden');
     switchTab('home');
   }
