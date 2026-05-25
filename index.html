@@ -181,7 +181,7 @@
       </div>
 
       <div class="w-full flex flex-col items-center">
-        <input type="file" id="file-input" accept="image/*" class="hidden" onchange="handleFileUpload(event)">
+        <input type="file" id="file-input" accept="image/*,.cr2,.nef,.arw,.dng,.raf,.orf" class="hidden" onchange="handleFileUpload(event)">
 
         <div id="upload-box"
              class="w-full max-w-3xl aspect-[4/3] sm:aspect-video rounded-xl border-2 border-dashed border-zinc-800 bg-zinc-900/50 flex flex-col items-center justify-center cursor-pointer hover:border-zinc-500 transition-all focus:outline-none focus:ring-2 focus:ring-cyan-500"
@@ -195,7 +195,7 @@
              onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); document.getElementById('file-input').click(); }">
           <i data-lucide="upload-cloud" class="w-12 h-12 mb-4 text-zinc-500"></i>
           <p class="text-lg font-medium mb-2">Drag & Drop or Paste your photo</p>
-          <p class="text-sm text-zinc-500">或點選此處選擇檔案 · 支援 Cmd+V / Ctrl+V · JPG / PNG</p>
+          <p class="text-sm text-zinc-500">或點選此處選擇檔案 · 支援 Cmd+V / Ctrl+V · JPG / PNG / RAW (CR2, NEF, ARW...)</p>
         </div>
 
         <div id="preview-box" class="w-full max-w-4xl flex-col items-center hidden">

@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { createIcons, icons } from 'lucide';
 import { WebGLLutFilter } from './webgl-lut.js';
 import { parseCubeToHaldCLUT } from './cube-parser.js';
+import exifr from 'exifr';
 
 // 1. 初始化圖示
 function initIcons() { createIcons({ icons }); }
@@ -230,7 +231,13 @@ window.handleDrop = function(event) {
   event.preventDefault();
   document.getElementById('upload-box').classList.remove('drag-over');
   const file = event.dataTransfer.files[0];
-  if (file && file.type.startsWith('image/')) loadImageFile(file);
+  
+  if (file) {
+    const isImage = file.type.startsWith('image/');
+    const rawExtensions = ['.cr2', '.nef', '.arw', '.dng', '.raf', '.orf'];
+    const isRaw = rawExtensions.some(ext => file.name.toLowerCase().endsWith(ext));
+    if (isImage || isRaw) loadImageFile(file);
+  }
 };
 
 window.handleFileUpload = function(event) {
@@ -238,7 +245,27 @@ window.handleFileUpload = function(event) {
   if (file) loadImageFile(file);
 };
 
-function loadImageFile(file) {
+async function loadImageFile(file) {
+  let fileToLoad = file;
+  const rawExtensions = ['.cr2', '.nef', '.arw', '.dng', '.raf', '.orf'];
+  const isRaw = rawExtensions.some(ext => file.name.toLowerCase().endsWith(ext));
+  
+  if (isRaw) {
+    showToast('偵測到 RAW 檔，正在擷取預覽...', 'info');
+    try {
+      const thumbnailData = await exifr.thumbnail(file);
+      if (thumbnailData) {
+        fileToLoad = new Blob([thumbnailData], { type: 'image/jpeg' });
+      } else {
+        throw new Error('找不到內嵌預覽圖');
+      }
+    } catch (e) {
+      console.error("RAW 解析失敗:", e);
+      showToast('無法解析此 RAW 檔案', 'error');
+      return;
+    }
+  }
+
   const reader = new FileReader();
   reader.onload = (e) => {
     currentImageDataUrl = e.target.result;
@@ -260,11 +287,11 @@ function loadImageFile(file) {
       document.getElementById('slider').value = 50;
       updateSlider();
       applyFilter(currentFilter);
-      showToast('照片載入成功！', 'success');
+      showToast(isRaw ? 'RAW 檔載入成功！' : '照片載入成功！', 'success');
     };
     currentImageObj.src = currentImageDataUrl;
   };
-  reader.readAsDataURL(file);
+  reader.readAsDataURL(fileToLoad);
 }
 
 window.handleLutUpload = function(event) {
