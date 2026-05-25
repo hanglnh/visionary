@@ -2,6 +2,7 @@ import './style.css';
 import { createClient } from '@supabase/supabase-js';
 import { createIcons, icons } from 'lucide';
 import { WebGLLutFilter } from './webgl-lut.js';
+import { parseCubeToHaldCLUT } from './cube-parser.js';
 
 // 1. 初始化圖示
 function initIcons() { createIcons({ icons }); }
@@ -46,10 +47,41 @@ let hasMorePosts = true;
 let isFetchingPosts = false;
 let observer = null;
 
+async function initSystemLUTs() {
+  const base = typeof import.meta.env !== 'undefined' ? import.meta.env.BASE_URL : '';
+  const neutralImg = new Image();
+  neutralImg.src = base + 'images/neutral_haldclut.png';
+  
+  await new Promise((resolve) => {
+    neutralImg.onload = resolve;
+    neutralImg.onerror = resolve; // Fallback if image missing
+  });
+
+  for (let filter of SYSTEM_FILTERS) {
+    if (filter.css && filter.css !== 'none') {
+      const canvas = document.createElement('canvas');
+      canvas.width = 512; 
+      canvas.height = 512;
+      const ctx = canvas.getContext('2d');
+      ctx.filter = filter.css;
+      ctx.drawImage(neutralImg, 0, 0);
+      
+      const img = new Image();
+      img.src = canvas.toDataURL('image/png');
+      filter.lut_obj = img; // 真正的 WebGL LUT 物件
+    } else if (filter.id === 'normal') {
+      filter.lut_obj = neutralImg;
+    }
+  }
+}
+
 window.onload = async () => {
   renderSystemFilters();
   initIcons();
   checkAuthSession();
+  
+  // 初始化系統 WebGL 濾鏡
+  await initSystemLUTs();
 
   // 綁定 Mock 登入事件
   const mockLoginForm = document.getElementById('mock-login-form');
@@ -240,6 +272,28 @@ window.handleLutUpload = function(event) {
   if (!file) return;
   
   const reader = new FileReader();
+  
+  // 處理 .cube 檔案
+  if (file.name.toLowerCase().endsWith('.cube')) {
+    reader.onload = async (e) => {
+      try {
+        const text = e.target.result;
+        const canvas = await parseCubeToHaldCLUT(text);
+        
+        const lutImg = new Image();
+        lutImg.onload = () => {
+          applyCustomLUT(lutImg, file);
+        };
+        lutImg.src = canvas.toDataURL('image/png');
+      } catch (err) {
+        showToast('解析 .cube 檔案失敗: ' + err.message, 'error');
+      }
+    };
+    reader.readAsText(file);
+    return;
+  }
+  
+  // 處理 .png 檔案
   reader.onload = (e) => {
     const lutImg = new Image();
     lutImg.onload = () => {
@@ -248,23 +302,26 @@ window.handleLutUpload = function(event) {
         showToast(`格式錯誤：請上傳標準的 512x512 HaldCLUT。您上傳的是 ${lutImg.width}x${lutImg.height}`, 'error');
         return;
       }
-      
-      currentLutFile = file; // Save for uploading to Supabase
-      const customFilter = { 
-        id: 'custom_lut', 
-        name: 'Custom LUT', 
-        css: 'none', 
-        color: 'border-purple-500 text-purple-500',
-        lut_obj: lutImg 
-      };
-      applyFilter(customFilter);
-      showToast('自訂 LUT 色票套用成功！', 'success');
-      event.target.value = ''; // Reset input
+      applyCustomLUT(lutImg, file);
     };
     lutImg.src = e.target.result;
   };
   reader.readAsDataURL(file);
 };
+
+function applyCustomLUT(lutImg, file) {
+  currentLutFile = file; // Save for uploading to Supabase
+  const customFilter = { 
+    id: 'custom_lut', 
+    name: 'Custom LUT', 
+    css: 'none', 
+    color: 'border-purple-500 text-purple-500',
+    lut_obj: lutImg 
+  };
+  applyFilter(customFilter);
+  showToast('自訂 LUT 色票套用成功！', 'success');
+  document.getElementById('lut-input').value = ''; // Reset input
+}
 
 window.downloadLutTemplate = function() {
   const base = typeof import.meta.env !== 'undefined' ? import.meta.env.BASE_URL : '';
@@ -592,7 +649,7 @@ function renderFeedUI(posts) {
     return `
     <div class="group relative bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-800 hover:border-zinc-600 transition-colors">
       <div class="aspect-[4/5] relative overflow-hidden bg-zinc-950">
-        <img src="${escapeHTML(post.preview_url)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" style="filter: ${escapeHTML(post.filter_css) || 'none'}" loading="lazy">
+        <img src="${escapeHTML(post.preview_url)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy">
         <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent opacity-80"></div>
         <div class="absolute bottom-0 left-0 right-0 p-5">
           <h3 class="text-xl font-bold mb-1">${escapeHTML(post.preset_name)}</h3>
@@ -779,6 +836,7 @@ window.applyFilter = function(idOrObj) {
   const filteredImg = document.getElementById('filtered-img');
   const filteredCanvas = document.getElementById('filtered-canvas');
   
+  // 現在系統已經 100% 走 WebGL 渲染，全部使用 lut_url 或 lut_obj
   if (currentFilter.lut_url || currentFilter.lut_obj) {
     filteredImg.classList.add('hidden');
     filteredCanvas.classList.remove('hidden');
@@ -795,9 +853,10 @@ window.applyFilter = function(idOrObj) {
       lutImg.src = currentFilter.lut_url;
     }
   } else {
+    // Fallback 如果發生意外沒有 LUT
     filteredCanvas.classList.add('hidden');
     filteredImg.classList.remove('hidden');
-    filteredImg.style.filter = currentFilter.css;
+    filteredImg.style.filter = currentFilter.css || 'none';
   }
   
   document.getElementById('share-btn').disabled = (currentFilter.id === 'normal');
