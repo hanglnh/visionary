@@ -4,6 +4,7 @@ import { createIcons, icons } from 'lucide';
 import { WebGLLutFilter } from './webgl-lut.js';
 import { parseCubeToHaldCLUT } from './cube-parser.js';
 import exifr from 'exifr';
+import imageCompression from 'browser-image-compression';
 
 // 1. 初始化圖示
 function initIcons() { createIcons({ icons }); }
@@ -265,6 +266,19 @@ async function loadImageFile(file) {
     }
   }
 
+  // 自動在背景進行最佳化壓縮，避免高畫質照片塞爆瀏覽器記憶體
+  try {
+    const options = {
+      maxSizeMB: 5,
+      maxWidthOrHeight: 2560,
+      useWebWorker: true,
+      initialQuality: 0.95 // 幾乎無損的品質
+    };
+    fileToLoad = await imageCompression(fileToLoad, options);
+  } catch (error) {
+    console.warn("壓縮處理失敗，改用原圖載入:", error);
+  }
+
   const reader = new FileReader();
   reader.onload = (e) => {
     currentImageDataUrl = e.target.result;
@@ -365,13 +379,13 @@ window.downloadLutTemplate = function() {
 window.downloadImage = function() {
   if (!currentImageDataUrl) return;
   const a = document.createElement('a');
-  a.download = `visionary_${currentFilter.name.replace(/[^a-z0-9]/gi,'_').toLowerCase()}_${Date.now()}.jpg`;
+  a.download = `visionary_${currentFilter.name.replace(/[^a-z0-9]/gi,'_').toLowerCase()}_${Date.now()}.png`;
 
   if (currentFilter.lut_url || currentFilter.lut_obj) {
     const canvas = document.getElementById('filtered-canvas');
-    a.href = canvas.toDataURL('image/jpeg', 0.95);
+    a.href = canvas.toDataURL('image/png');
     a.click();
-    showToast('圖片下載成功！', 'success');
+    showToast('高品質原圖下載成功！', 'success');
   } else {
     const canvas = document.createElement('canvas');
     const img = new Image();
@@ -381,9 +395,9 @@ window.downloadImage = function() {
       const ctx = canvas.getContext('2d');
       if (currentFilter.css && currentFilter.css !== 'none') ctx.filter = currentFilter.css;
       ctx.drawImage(img, 0, 0);
-      a.href = canvas.toDataURL('image/jpeg', 0.95);
+      a.href = canvas.toDataURL('image/png');
       a.click();
-      showToast('圖片下載成功！', 'success');
+      showToast('高品質原圖下載成功！', 'success');
     };
     img.src = currentImageDataUrl;
   }
