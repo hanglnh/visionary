@@ -16,6 +16,11 @@
   <!-- 背景層 -->
   <div class="fixed inset-0 pointer-events-none opacity-[0.03] noise-bg z-0"></div>
 
+  <!-- ================= Mock 模式橫幅 ================= -->
+  <div id="mock-banner" class="hidden bg-orange-500 text-black font-bold text-center py-2 text-sm z-[100] relative w-full sticky top-0">
+    <i data-lucide="alert-triangle" class="w-4 h-4 inline-block mr-1 -mt-1"></i> Mock 模式 - API 請求由 MSW 模擬處理，非真實資料
+  </div>
+
   <!-- ================= 頂部導覽列 ================= -->
   <header class="sticky top-0 px-4 sm:px-6 py-4 border-b border-white/10 flex justify-between items-center z-50 backdrop-blur-xl bg-zinc-950/40">
     <div class="flex items-center gap-2">
@@ -35,6 +40,9 @@
       </button>
       <button onclick="switchTab('explore')" id="tab-explore" role="tab" aria-selected="false" aria-controls="section-explore" class="tab-btn flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 rounded-full text-sm font-bold text-zinc-500 hover:text-zinc-300 transition-all">
         <i data-lucide="compass" class="w-4 h-4"></i> <span class="hidden sm:inline">Explore</span>
+      </button>
+      <button onclick="toggleMockMode()" id="tab-mock" class="flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 rounded-full text-sm font-bold text-orange-500 bg-orange-500/10 hover:bg-orange-500/20 transition-all border border-orange-500/30 ml-2">
+        <i data-lucide="shield-alert" class="w-4 h-4"></i> <span class="hidden sm:inline">Mock System</span>
       </button>
     </div>
 
@@ -266,6 +274,78 @@
         <p class="text-sm">找不到符合的 Preset</p>
       </div>
     </section>
+
+    <!-- ================= Mock 登入頁 ================= -->
+    <section id="section-mock-login" class="hidden flex-col items-center justify-center pt-20 transition-opacity duration-500">
+      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-sm p-8 shadow-2xl relative overflow-hidden">
+        <div class="absolute top-0 left-0 right-0 h-1 bg-orange-500"></div>
+        <div class="text-center mb-6">
+          <h3 class="text-2xl font-bold mb-2">Mock Login</h3>
+          <p class="text-xs text-zinc-400">測試帳號：<br>admin@visionary.test / admin123<br>user@visionary.test / user123</p>
+        </div>
+        <form id="mock-login-form" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-zinc-500 mb-1">Email</label>
+            <input type="email" id="mock-email" required class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-white outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-zinc-500 mb-1">Password</label>
+            <input type="password" id="mock-password" required class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-white outline-none">
+          </div>
+          <p id="mock-login-error" class="text-red-400 text-xs hidden"></p>
+          <button type="submit" class="w-full mt-6 bg-orange-500 text-black hover:bg-orange-400 font-bold py-3.5 rounded-lg transition-colors">Login</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ================= Mock 使用者前台 ================= -->
+    <section id="section-mock-user" class="hidden flex-col items-center pt-20 transition-opacity duration-500">
+      <div class="w-full max-w-2xl bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
+        <div class="flex items-center justify-between mb-8 pb-4 border-b border-zinc-800">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xl font-bold">U</div>
+            <div>
+              <h2 class="text-2xl font-bold">Welcome, User 👋</h2>
+              <span class="text-xs px-2 py-0.5 bg-zinc-800 text-zinc-400 rounded">一般用戶</span>
+            </div>
+          </div>
+          <button onclick="mockLogout()" class="px-4 py-2 border border-zinc-700 hover:bg-zinc-800 rounded text-sm transition">登出</button>
+        </div>
+        <div class="text-center py-10">
+          <h3 class="text-4xl font-black text-zinc-800 mb-4">USER DASHBOARD</h3>
+          <p class="text-zinc-500 text-sm">一般用戶不會看到管理者功能，也不能誤闖管理者後台。</p>
+          <button onclick="switchTab('mock-admin')" class="mt-8 text-xs text-orange-500 underline">嘗試進入後台 (將被阻擋)</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= Mock 管理員後台 ================= -->
+    <section id="section-mock-admin" class="hidden flex-col items-center pt-20 transition-opacity duration-500">
+      <div class="w-full max-w-2xl bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
+        <div class="flex items-center justify-between mb-8 pb-4 border-b border-zinc-800">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-rose-500 text-white rounded-full flex items-center justify-center text-xl font-bold">A</div>
+            <div>
+              <h2 class="text-2xl font-bold text-rose-400">Admin Backend</h2>
+              <span class="text-xs px-2 py-0.5 bg-rose-950 text-rose-400 rounded border border-rose-900">最高權限管理員</span>
+            </div>
+          </div>
+          <button onclick="mockLogout()" class="px-4 py-2 border border-zinc-700 hover:bg-zinc-800 rounded text-sm transition">登出</button>
+        </div>
+        
+        <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-6 text-center">
+          <i data-lucide="lock" class="w-16 h-16 text-yellow-500 mx-auto mb-4"></i>
+          <h3 class="text-2xl font-bold mb-6">管理員專屬頁面</h3>
+          
+          <div class="text-left space-y-3 max-w-sm mx-auto">
+            <p class="flex items-center gap-2 text-sm"><i data-lucide="check-square" class="text-emerald-400 w-4 h-4"></i> 只有 admin 角色可以訪問</p>
+            <p class="flex items-center gap-2 text-sm"><i data-lucide="x-circle" class="text-rose-400 w-4 h-4"></i> user 角色會被重定向</p>
+            <p class="flex items-center gap-2 text-sm"><i data-lucide="shield" class="text-yellow-400 w-4 h-4"></i> 受路由守衛保護</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <!-- ================= 🚀 Auth 登入 / 註冊模態框 ================= -->

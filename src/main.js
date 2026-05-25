@@ -37,10 +37,18 @@ let allPosts = [];
 let lastFetchTime = 0;
 const CACHE_DURATION_MS = 3 * 60 * 1000;
 let loggedInUser = null;
+let isMockMode = false;
 
 window.onload = async () => {
   renderSystemFilters();
-  setupPasteListener();
+  initIcons();
+  checkAuthSession();
+
+  // 綁定 Mock 登入事件
+  const mockLoginForm = document.getElementById('mock-login-form');
+  if (mockLoginForm) {
+    mockLoginForm.addEventListener('submit', handleMockLogin);
+  }
   
   if (isSupabaseConnected) {
     await checkUserSession();
@@ -530,30 +538,130 @@ function renderFeedUI(posts) {
   initIcons();
 }
 
-window.switchTab = function(tabName) {
-  ['home', 'studio', 'explore'].forEach(tab => {
-    const el = document.getElementById(`section-${tab}`);
-    el.classList.add('hidden');
-    el.classList.remove('flex');
-    const tabBtn = document.getElementById(`tab-${tab}`);
-    tabBtn.className = `tab-btn flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 rounded-full text-sm font-bold text-zinc-500 hover:text-zinc-300 transition-all`;
-    tabBtn.setAttribute('aria-selected', 'false');
+/* ================= Mock RBAC System ================= */
+window.toggleMockMode = async function() {
+  isMockMode = !isMockMode;
+  const banner = document.getElementById('mock-banner');
+  const mockTabBtn = document.getElementById('tab-mock');
+  
+  if (isMockMode) {
+    if (!window.__mswStarted) {
+      const { worker } = await import('./mocks/browser.js');
+      await worker.start({ onUnhandledRequest: 'bypass' });
+      window.__mswStarted = true;
+    }
+    banner.classList.remove('hidden');
+    mockTabBtn.classList.replace('text-orange-500', 'text-white');
+    mockTabBtn.classList.replace('bg-orange-500/10', 'bg-orange-500');
+    switchTab('mock-login');
+  } else {
+    banner.classList.add('hidden');
+    mockTabBtn.classList.replace('text-white', 'text-orange-500');
+    mockTabBtn.classList.replace('bg-orange-500', 'bg-orange-500/10');
+    switchTab('home');
+  }
+};
+
+async function handleMockLogin(event) {
+  event.preventDefault();
+  const email = document.getElementById('mock-email').value;
+  const password = document.getElementById('mock-password').value;
+  const errorEl = document.getElementById('mock-login-error');
+  errorEl.classList.add('hidden');
+
+  try {
+    const res = await fetch('/api/mock-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+
+    if (!res.ok) throw new Error('帳號或密碼錯誤');
+
+    const data = await res.json();
+    localStorage.setItem('mock_token', data.token);
+    localStorage.setItem('mock_user', JSON.stringify(data.user));
+
+    showToast('Mock 登入成功！', 'success');
     
-    // Mobile tab reset
-    const mobileBtn = document.getElementById(`tab-${tab}-mobile`);
-    if (mobileBtn) {
-      mobileBtn.className = 'mobile-tab-btn flex flex-col items-center p-2 text-zinc-500 transition-colors';
+    // 依據角色跳轉
+    if (data.user.role === 'admin') {
+      switchTab('mock-admin');
+    } else {
+      switchTab('mock-user');
+    }
+  } catch (err) {
+    errorEl.textContent = err.message;
+    errorEl.classList.remove('hidden');
+  }
+}
+
+window.mockLogout = function() {
+  localStorage.removeItem('mock_token');
+  localStorage.removeItem('mock_user');
+  showToast('Mock 已登出', 'success');
+  switchTab('mock-login');
+};
+
+window.switchTab = function(tabName) {
+  // 隱藏所有 section
+  ['home', 'studio', 'explore', 'mock-login', 'mock-user', 'mock-admin'].forEach(tab => {
+    const el = document.getElementById(`section-${tab}`);
+    if (el) {
+      el.classList.add('hidden');
+      el.classList.remove('flex');
+    }
+    
+    // 取消原本的標籤狀態
+    if (['home', 'studio', 'explore'].includes(tab)) {
+      const tabBtn = document.getElementById(`tab-${tab}`);
+      if (tabBtn) {
+        tabBtn.className = `tab-btn flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 rounded-full text-sm font-bold text-zinc-500 hover:text-zinc-300 transition-all`;
+        tabBtn.setAttribute('aria-selected', 'false');
+      }
+      const mobileBtn = document.getElementById(`tab-${tab}-mobile`);
+      if (mobileBtn) {
+        mobileBtn.className = 'mobile-tab-btn flex flex-col items-center p-2 text-zinc-500 transition-colors';
+      }
     }
   });
+
+  // Mock 路由守衛 (Route Guard)
+  if (tabName.startsWith('mock-') && tabName !== 'mock-login') {
+    const token = localStorage.getItem('mock_token');
+    const userStr = localStorage.getItem('mock_user');
+    const user = userStr ? JSON.parse(userStr) : null;
+
+    if (!token) {
+      showToast('未授權，請重登入', 'error');
+      return switchTab('mock-login');
+    }
+
+    if (tabName === 'mock-admin' && user?.role !== 'admin') {
+      showToast('您沒有管理員權限！將被重定向', 'error');
+      return switchTab('mock-user');
+    }
+    
+    // 如果是管理員存取 user 頁面，可以放行或導向 admin (這裡選擇放行或自動導向)
+    if (tabName === 'mock-user' && user?.role === 'admin') {
+      return switchTab('mock-admin');
+    }
+  }
   
   const targetEl = document.getElementById(`section-${tabName}`);
-  targetEl.classList.remove('hidden');
-  targetEl.classList.add('flex');
+  if (targetEl) {
+    targetEl.classList.remove('hidden');
+    targetEl.classList.add('flex');
+  }
   
-  const targetBtn = document.getElementById(`tab-${tabName}`);
-  let colorClass = tabName === 'studio' ? 'bg-zinc-800 text-cyan-400 shadow-lg' : (tabName === 'explore' ? 'bg-zinc-800 text-rose-400 shadow-lg' : 'bg-zinc-800 text-white shadow-lg');
-  targetBtn.className = `tab-btn flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 rounded-full text-sm font-bold transition-all ${colorClass}`;
-  targetBtn.setAttribute('aria-selected', 'true');
+  if (['home', 'studio', 'explore'].includes(tabName)) {
+    const targetBtn = document.getElementById(`tab-${tabName}`);
+    if (targetBtn) {
+      let colorClass = tabName === 'studio' ? 'bg-zinc-800 text-cyan-400 shadow-lg' : (tabName === 'explore' ? 'bg-zinc-800 text-rose-400 shadow-lg' : 'bg-zinc-800 text-white shadow-lg');
+      targetBtn.className = `tab-btn flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 rounded-full text-sm font-bold transition-all ${colorClass}`;
+      targetBtn.setAttribute('aria-selected', 'true');
+    }
+  }
   
   // Mobile tab active state
   const targetMobileBtn = document.getElementById(`tab-${tabName}-mobile`);
