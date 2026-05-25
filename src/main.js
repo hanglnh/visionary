@@ -79,7 +79,6 @@ async function initSystemLUTs() {
 window.onload = async () => {
   renderSystemFilters();
   initIcons();
-  checkAuthSession();
   
   // 初始化系統 WebGL 濾鏡
   await initSystemLUTs();
