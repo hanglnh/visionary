@@ -672,10 +672,18 @@ function renderFeedUI(posts) {
   document.getElementById('no-results').classList.add('hidden');
   document.getElementById('community-feed').innerHTML = posts.map(post => {
     const lutUrlArg = post.lut_url ? `'${post.lut_url}'` : 'null';
+    
+    // 向後相容：昨天之前的貼文沒有將濾鏡烘焙 (Bake) 到預覽圖中，所以我們需要補上 CSS 濾鏡。
+    // 在 2026-05-26 之後發布的貼文，預覽圖本身就已經是調色過的，所以不需要 CSS 濾鏡。
+    let displayFilter = 'none';
+    if (!post.created_at || new Date(post.created_at) < new Date('2026-05-26T00:00:00Z')) {
+      displayFilter = post.filter_css || 'none';
+    }
+
     return `
     <div class="group relative bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-800 hover:border-zinc-600 transition-colors">
       <div class="aspect-[4/5] relative overflow-hidden bg-zinc-950">
-        <img src="${escapeHTML(post.preview_url)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy">
+        <img src="${escapeHTML(post.preview_url)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" style="filter: ${escapeHTML(displayFilter)}" loading="lazy">
         <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent opacity-80"></div>
         <div class="absolute bottom-0 left-0 right-0 p-5">
           <h3 class="text-xl font-bold mb-1">${escapeHTML(post.preset_name)}</h3>
