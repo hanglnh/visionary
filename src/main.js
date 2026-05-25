@@ -539,10 +539,26 @@ function renderFeedUI(posts) {
 }
 
 /* ================= Mock RBAC System ================= */
+let secretClickCount = 0;
+let secretClickTimer = null;
+
+window.handleSecretClick = function() {
+  secretClickCount++;
+  if (secretClickTimer) clearTimeout(secretClickTimer);
+  
+  secretClickTimer = setTimeout(() => {
+    secretClickCount = 0;
+  }, 1000);
+  
+  if (secretClickCount >= 5) {
+    secretClickCount = 0;
+    toggleMockMode();
+  }
+};
+
 window.toggleMockMode = async function() {
   isMockMode = !isMockMode;
   const banner = document.getElementById('mock-banner');
-  const mockTabBtn = document.getElementById('tab-mock');
   
   if (isMockMode) {
     if (!window.__mswStarted) {
@@ -551,13 +567,9 @@ window.toggleMockMode = async function() {
       window.__mswStarted = true;
     }
     banner.classList.remove('hidden');
-    mockTabBtn.classList.replace('text-orange-500', 'text-white');
-    mockTabBtn.classList.replace('bg-orange-500/10', 'bg-orange-500');
     switchTab('mock-login');
   } else {
     banner.classList.add('hidden');
-    mockTabBtn.classList.replace('text-white', 'text-orange-500');
-    mockTabBtn.classList.replace('bg-orange-500', 'bg-orange-500/10');
     switchTab('home');
   }
 };

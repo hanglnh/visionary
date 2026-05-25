@@ -23,9 +23,9 @@
 
   <!-- ================= 頂部導覽列 ================= -->
   <header class="sticky top-0 px-4 sm:px-6 py-4 border-b border-white/10 flex justify-between items-center z-50 backdrop-blur-xl bg-zinc-950/40">
-    <div class="flex items-center gap-2">
-      <i data-lucide="camera" class="w-6 h-6 text-cyan-400"></i>
-      <h1 class="text-lg sm:text-xl md:text-2xl font-bold tracking-widest uppercase">
+    <div class="flex items-center gap-2 cursor-pointer select-none" onclick="handleSecretClick()" title="Secret area">
+      <i data-lucide="camera" class="w-6 h-6 text-cyan-400 pointer-events-none"></i>
+      <h1 class="text-lg sm:text-xl md:text-2xl font-bold tracking-widest uppercase pointer-events-none">
         Visionary<span class="text-cyan-400">.</span>
       </h1>
     </div>
@@ -40,9 +40,6 @@
       </button>
       <button onclick="switchTab('explore')" id="tab-explore" role="tab" aria-selected="false" aria-controls="section-explore" class="tab-btn flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 rounded-full text-sm font-bold text-zinc-500 hover:text-zinc-300 transition-all">
         <i data-lucide="compass" class="w-4 h-4"></i> <span class="hidden sm:inline">Explore</span>
-      </button>
-      <button onclick="toggleMockMode()" id="tab-mock" class="flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 rounded-full text-sm font-bold text-orange-500 bg-orange-500/10 hover:bg-orange-500/20 transition-all border border-orange-500/30 ml-2">
-        <i data-lucide="shield-alert" class="w-4 h-4"></i> <span class="hidden sm:inline">Mock System</span>
       </button>
     </div>
 
