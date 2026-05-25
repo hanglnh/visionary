@@ -34,6 +34,8 @@ let webglFilter = null;
 let currentLutFile = null;
 let currentFilter = SYSTEM_FILTERS[0];
 let allPosts = [];
+let lastFetchTime = 0;
+const CACHE_DURATION_MS = 3 * 60 * 1000;
 let loggedInUser = null;
 
 window.onload = async () => {
@@ -339,10 +341,20 @@ function showToast(msg, type = 'success') {
 }
 
 /* ================= Supabase 發布邏輯 ================= */
-async function fetchCommunityPosts() {
+async function fetchCommunityPosts(force = false) {
+  const now = Date.now();
+  if (!force && allPosts.length > 0 && (now - lastFetchTime) < CACHE_DURATION_MS) {
+    renderFeedUI(allPosts);
+    return;
+  }
+
   renderSkeletons();
   try {
-    const { data, error } = await supabaseClient.from('community_posts').select('*').limit(50);
+    const { data, error } = await supabaseClient
+      .from('community_posts')
+      .select('preset_name, author_ig, filter_css, preview_url, lut_url, created_at')
+      .order('created_at', { ascending: false })
+      .limit(50);
     
     if (error) {
       if (error.code === '42501') showToast('資料庫權限錯誤 (42501)，切換為模擬資料', 'warn');
@@ -355,7 +367,8 @@ async function fetchCommunityPosts() {
       return;
     }
 
-    allPosts = data.reverse();
+    allPosts = data;
+    lastFetchTime = Date.now();
     renderFeedUI(allPosts);
   } catch (err) {
     console.error("fetchCommunityPosts error:", err);
@@ -451,7 +464,7 @@ window.publishToSupabase = async function(event) {
     document.getElementById('share-ig').value = '';
     
     switchTab('explore');
-    await fetchCommunityPosts();
+    await fetchCommunityPosts(true);
   } catch (error) {
     showToast('發布失敗：' + error.message, 'error');
   } finally {
