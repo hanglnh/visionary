@@ -39,6 +39,13 @@ const CACHE_DURATION_MS = 3 * 60 * 1000;
 let loggedInUser = null;
 let isMockMode = false;
 
+// Pagination variables
+let currentPage = 0;
+const PAGE_SIZE = 12;
+let hasMorePosts = true;
+let isFetchingPosts = false;
+let observer = null;
+
 window.onload = async () => {
   renderSystemFilters();
   initIcons();
@@ -351,38 +358,92 @@ function showToast(msg, type = 'success') {
 /* ================= Supabase 發布邏輯 ================= */
 async function fetchCommunityPosts(force = false) {
   const now = Date.now();
+  
+  if (force) {
+    currentPage = 0;
+    hasMorePosts = true;
+    allPosts = [];
+  }
+
   if (!force && allPosts.length > 0 && (now - lastFetchTime) < CACHE_DURATION_MS) {
     renderFeedUI(allPosts);
+    setupIntersectionObserver();
     return;
   }
 
-  renderSkeletons();
+  if (isFetchingPosts || !hasMorePosts) return;
+  isFetchingPosts = true;
+
+  if (currentPage === 0) {
+    renderSkeletons();
+  } else {
+    document.getElementById('load-more-spinner').classList.remove('hidden');
+  }
+
   try {
+    const start = currentPage * PAGE_SIZE;
+    const end = start + PAGE_SIZE - 1;
+
     const { data, error } = await supabaseClient
       .from('community_posts')
       .select('preset_name, author_ig, filter_css, preview_url, lut_url, created_at')
       .order('created_at', { ascending: false })
-      .limit(50);
+      .range(start, end);
     
     if (error) {
       if (error.code === '42501') showToast('資料庫權限錯誤 (42501)，切換為模擬資料', 'warn');
       renderMockFeed();
-      return;
+      hasMorePosts = false;
+    } else {
+      if (!data || data.length === 0) {
+        if (currentPage === 0) renderMockFeed();
+        hasMorePosts = false;
+      } else {
+        if (currentPage === 0) {
+          allPosts = data;
+        } else {
+          allPosts = [...allPosts, ...data];
+        }
+        
+        if (data.length < PAGE_SIZE) {
+          hasMorePosts = false;
+        }
+        
+        lastFetchTime = Date.now();
+        currentPage++;
+      }
     }
-    
-    if (!data || data.length === 0) {
-      renderMockFeed();
-      return;
-    }
-
-    allPosts = data;
-    lastFetchTime = Date.now();
-    renderFeedUI(allPosts);
   } catch (err) {
-    console.error("fetchCommunityPosts error:", err);
-    renderMockFeed();
+    console.error(err);
+  } finally {
+    isFetchingPosts = false;
+    document.getElementById('load-more-spinner').classList.add('hidden');
+    renderFeedUI(allPosts);
+    setupIntersectionObserver();
   }
 }
+
+function setupIntersectionObserver() {
+  if (observer) {
+    observer.disconnect();
+  }
+  
+  const trigger = document.getElementById('load-more-trigger');
+  if (!trigger) return;
+
+  observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting && hasMorePosts && !isFetchingPosts) {
+      // 只有在沒有搜尋條件時才載入更多
+      const q = document.getElementById('search-input').value.trim();
+      if (q === '') {
+        fetchCommunityPosts();
+      }
+    }
+  }, { rootMargin: '100px' });
+  
+  observer.observe(trigger);
+}
+
 
 window.openShareModal = function() { 
   if (!loggedInUser) {
@@ -511,6 +572,19 @@ function renderMockFeed() {
   renderFeedUI(allPosts);
 }
 
+function escapeHTML(str) {
+  if (!str) return '';
+  return str.replace(/[&<>'"]/g, 
+    tag => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[tag])
+  );
+}
+
 function renderFeedUI(posts) {
   document.getElementById('no-results').classList.add('hidden');
   document.getElementById('community-feed').innerHTML = posts.map(post => {
@@ -518,16 +592,16 @@ function renderFeedUI(posts) {
     return `
     <div class="group relative bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-800 hover:border-zinc-600 transition-colors">
       <div class="aspect-[4/5] relative overflow-hidden bg-zinc-950">
-        <img src="${post.preview_url}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" style="filter: ${post.filter_css || 'none'}" loading="lazy">
+        <img src="${escapeHTML(post.preview_url)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" style="filter: ${escapeHTML(post.filter_css) || 'none'}" loading="lazy">
         <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent opacity-80"></div>
         <div class="absolute bottom-0 left-0 right-0 p-5">
-          <h3 class="text-xl font-bold mb-1">${post.preset_name}</h3>
+          <h3 class="text-xl font-bold mb-1">${escapeHTML(post.preset_name)}</h3>
           <p class="text-zinc-400 text-sm flex items-center gap-1.5 mb-4 hover:text-white transition-colors">
-            <i data-lucide="instagram" class="w-3.5 h-3.5"></i> ${post.author_ig}
+            <i data-lucide="instagram" class="w-3.5 h-3.5"></i> ${escapeHTML(post.author_ig)}
           </p>
           <div class="flex gap-2">
-            <button onclick="tryCommunityPreset('${post.filter_css}', '${post.preset_name}', ${lutUrlArg})" class="flex-1 bg-white text-black py-2.5 rounded-lg font-bold text-sm hover:bg-rose-400 hover:text-white transition-colors">Try Preset</button>
-            <a href="https://www.instagram.com/${post.author_ig}" target="_blank" class="px-4 py-2.5 bg-zinc-800 rounded-lg flex items-center justify-center hover:bg-rose-600 transition-colors">
+            <button onclick="tryCommunityPreset('${escapeHTML(post.filter_css)}', '${escapeHTML(post.preset_name)}', ${lutUrlArg})" class="flex-1 bg-white text-black py-2.5 rounded-lg font-bold text-sm hover:bg-rose-400 hover:text-white transition-colors">Try Preset</button>
+            <a href="https://www.instagram.com/${escapeHTML(post.author_ig)}" target="_blank" class="px-4 py-2.5 bg-zinc-800 rounded-lg flex items-center justify-center hover:bg-rose-600 transition-colors">
               <i data-lucide="instagram" class="w-5 h-5"></i>
             </a>
           </div>

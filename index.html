@@ -265,6 +265,14 @@
       </div>
 
       <div id="community-feed" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+      <!-- Infinite Scroll Trigger -->
+      <div id="load-more-trigger" class="h-20 w-full flex items-center justify-center mt-6">
+        <div id="load-more-spinner" class="hidden flex items-center gap-2 text-zinc-400">
+          <i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i>
+          <span class="text-sm font-bold tracking-widest">LOADING MORE...</span>
+        </div>
+      </div>
       
       <div id="no-results" class="hidden text-center py-20 text-zinc-500">
         <i data-lucide="search-x" class="w-10 h-10 mx-auto mb-4 opacity-40"></i>
