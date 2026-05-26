@@ -12,6 +12,12 @@
   <meta property="og:type" content="website">
   <link rel="icon" type="image/svg+xml" href="/visionary/favicon.svg">
   
+  <!-- PWA Settings -->
+  <link rel="manifest" href="/visionary/manifest.json">
+  <meta name="theme-color" content="#09090b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
 </head>
 <body class="text-zinc-100 font-sans selection:bg-cyan-500/30 overflow-x-hidden relative min-h-screen pb-20">
 
@@ -201,8 +207,9 @@
         </div>
 
         <div id="preview-box" class="w-full max-w-4xl flex-col items-center hidden">
-          <div class="relative w-full aspect-[4/3] sm:aspect-video bg-black rounded-lg overflow-hidden ring-1 ring-white/10 shadow-2xl">
-            <canvas id="filtered-canvas" class="absolute inset-0 w-full h-full object-contain hidden"></canvas>
+          <div class="sticky top-[10px] sm:static z-40 sm:z-auto bg-zinc-950/90 sm:bg-transparent backdrop-blur-xl sm:backdrop-blur-none pb-4 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0 transition-all w-full">
+            <div class="relative w-full aspect-[4/3] sm:aspect-video bg-black rounded-lg overflow-hidden ring-1 ring-white/10 shadow-2xl">
+              <canvas id="filtered-canvas" class="absolute inset-0 w-full h-full object-contain hidden"></canvas>
             <img id="filtered-img" class="absolute inset-0 w-full h-full object-contain" alt="Filtered preview of your photo">
             <img id="original-img" class="absolute inset-0 w-full h-full object-contain" alt="Original uploaded photo">
             <input type="range" id="slider" aria-label="Before and after comparison slider" min="0" max="100" value="50" class="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-20 m-0" oninput="updateSlider()">
@@ -227,6 +234,7 @@
             <button id="share-btn" onclick="openShareModal()" disabled class="px-6 py-2.5 rounded-lg text-sm font-bold bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors flex items-center gap-2 shadow-[0_0_15px_rgba(8,145,178,0.4)]">
               <i data-lucide="share-2" class="w-4 h-4"></i> Share to Explore
             </button>
+          </div>
           </div>
         </div>
       </div>
@@ -356,11 +364,12 @@
   </main>
 
   <!-- ================= 🚀 Auth 登入 / 註冊模態框 ================= -->
-  <div id="auth-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+  <div id="auth-modal" class="fixed inset-0 z-[100] hidden items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeAuthModal()"></div>
-    <div class="relative bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-sm p-8 shadow-2xl">
+    <div class="relative bg-zinc-900 border-t sm:border border-zinc-800 rounded-t-3xl sm:rounded-2xl w-full max-w-sm p-8 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] sm:shadow-2xl animate-slide-up sm:animate-none transition-all">
       <button onclick="closeAuthModal()" aria-label="Close modal" class="absolute top-4 right-4 text-zinc-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 rounded"><i data-lucide="x" class="w-5 h-5"></i></button>
       
+      <div class="w-12 h-1.5 bg-zinc-700 rounded-full mx-auto mb-6 sm:hidden"></div>
       <div class="text-center mb-6">
         <i data-lucide="user-circle" class="w-10 h-10 text-cyan-400 mx-auto mb-2"></i>
         <h3 id="auth-title" class="text-2xl font-bold">Login to Visionary</h3>
@@ -389,9 +398,10 @@
   </div>
 
   <!-- ================= 分享模態框 ================= -->
-  <div id="share-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+  <div id="share-modal" class="fixed inset-0 z-[100] hidden items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeShareModal()"></div>
-    <div class="relative bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md p-6 shadow-2xl">
+    <div class="relative bg-zinc-900 border-t sm:border border-zinc-800 rounded-t-3xl sm:rounded-2xl w-full max-w-md p-6 pb-safe sm:pb-6 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] sm:shadow-2xl animate-slide-up sm:animate-none transition-all">
+      <div class="w-12 h-1.5 bg-zinc-700 rounded-full mx-auto mb-6 sm:hidden"></div>
       <h3 class="text-2xl font-bold mb-2 flex items-center gap-2"><i data-lucide="share-2" class="w-6 h-6 text-cyan-400"></i> Share Preset</h3>
       <p class="text-zinc-400 text-sm mb-6">發布至真實資料庫，讓全世界看到你的調色。</p>
       <form id="share-form" onsubmit="publishToSupabase(event)" class="space-y-4">
@@ -420,5 +430,12 @@
   </div>
 
   <script type="module" src="/src/main.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/visionary/sw.js').catch(err => console.log('SW Reg Failed:', err));
+      });
+    }
+  </script>
 </body>
 </html>

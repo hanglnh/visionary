@@ -96,7 +96,46 @@ window.onload = async () => {
   } else {
     renderMockFeed();
   }
+  
+  // 初始化手機端手勢
+  setupGestures();
 };
+
+/* ================= 📱 手機端手勢與互動 ================= */
+function setupGestures() {
+  let touchStartX = 0;
+  let touchEndX = 0;
+  const tabs = ['home', 'studio', 'explore'];
+  
+  document.addEventListener('touchstart', e => {
+    touchStartX = e.changedTouches[0].screenX;
+  }, { passive: true });
+  
+  document.addEventListener('touchend', e => {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe();
+  }, { passive: true });
+  
+  function handleSwipe() {
+    if (!document.getElementById('auth-modal').classList.contains('hidden') || 
+        !document.getElementById('share-modal').classList.contains('hidden')) return;
+    
+    // 忽略在滑桿上的左右滑動
+    if (document.activeElement && document.activeElement.id === 'slider') return;
+    
+    const diffX = touchStartX - touchEndX;
+    const swipeThreshold = 80;
+    
+    const currentTab = tabs.find(t => !document.getElementById(`section-${t}`)?.classList.contains('hidden')) || 'home';
+    let currentTabIndex = tabs.indexOf(currentTab);
+    
+    if (diffX > swipeThreshold) {
+      if (currentTabIndex < tabs.length - 1) switchTab(tabs[currentTabIndex + 1]);
+    } else if (diffX < -swipeThreshold) {
+      if (currentTabIndex > 0) switchTab(tabs[currentTabIndex - 1]);
+    }
+  }
+}
 
 /* ================= 全域事件監聽 ================= */
 function setupPasteListener() {
@@ -848,6 +887,9 @@ window.switchTab = function(tabName) {
   }
   
   if (['home', 'studio', 'explore'].includes(tabName)) {
+    // 手機端震動回饋 (Haptics)
+    if (navigator.vibrate) navigator.vibrate(15);
+    
     const targetBtn = document.getElementById(`tab-${tabName}`);
     if (targetBtn) {
       let colorClass = tabName === 'studio' ? 'bg-zinc-800 text-cyan-400 shadow-lg' : (tabName === 'explore' ? 'bg-zinc-800 text-rose-400 shadow-lg' : 'bg-zinc-800 text-white shadow-lg');

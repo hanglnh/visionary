@@ -1,0 +1,16 @@
+{
+  "name": "Visionary Presets",
+  "short_name": "Visionary",
+  "description": "Professional web-based photography color grading tool.",
+  "start_url": "/visionary/",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
