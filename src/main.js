@@ -332,8 +332,12 @@ async function loadImageFile(file) {
       document.getElementById('filter-controls').classList.remove('opacity-40', 'pointer-events-none');
       
       if (!webglFilter) {
-        const canvas = document.getElementById('filtered-canvas');
-        webglFilter = new WebGLLutFilter(canvas);
+        try {
+          const canvas = document.getElementById('filtered-canvas');
+          webglFilter = new WebGLLutFilter(canvas);
+        } catch(e) {
+          console.warn('WebGL init failed, using CSS fallback:', e);
+        }
       }
       
       document.getElementById('slider').value = 50;
@@ -931,19 +935,35 @@ window.applyFilter = function(idOrObj) {
     filteredImg.classList.add('hidden');
     filteredCanvas.classList.remove('hidden');
     
-    if (currentFilter.lut_obj && currentImageObj) {
-      webglFilter.render(currentImageObj, currentFilter.lut_obj);
-    } else if (currentFilter.lut_url && currentImageObj) {
+    if (currentFilter.lut_obj && currentImageObj && webglFilter) {
+      try {
+        webglFilter.render(currentImageObj, currentFilter.lut_obj);
+      } catch (e) {
+        console.warn('WebGL render failed, falling back to CSS:', e);
+        fallbackToCSS();
+      }
+    } else if (currentFilter.lut_url && currentImageObj && webglFilter) {
       const lutImg = new Image();
       lutImg.crossOrigin = 'anonymous';
       lutImg.onload = () => {
         currentFilter.lut_obj = lutImg;
-        webglFilter.render(currentImageObj, lutImg);
+        try {
+          webglFilter.render(currentImageObj, lutImg);
+        } catch (e) {
+          console.warn('WebGL render failed, falling back to CSS:', e);
+          fallbackToCSS();
+        }
       };
       lutImg.src = currentFilter.lut_url;
+    } else {
+      fallbackToCSS();
     }
   } else {
-    // Fallback 如果發生意外沒有 LUT
+    fallbackToCSS();
+  }
+  
+  function fallbackToCSS() {
+    // Fallback 如果發生意外沒有 LUT，或 WebGL 失敗
     filteredCanvas.classList.add('hidden');
     filteredImg.classList.remove('hidden');
     filteredImg.style.filter = currentFilter.css || 'none';
