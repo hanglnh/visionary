@@ -88,6 +88,9 @@ window.onload = async () => {
   
   // 初始化手機端手勢
   setupGestures();
+
+  // 預設進入 Studio
+  switchTab('studio');
 };
 
 /* ================= 📱 手機端手勢與互動 ================= */
