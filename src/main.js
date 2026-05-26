@@ -60,18 +60,7 @@ async function initSystemLUTs() {
   });
 
   for (let filter of SYSTEM_FILTERS) {
-    if (filter.css && filter.css !== 'none') {
-      const canvas = document.createElement('canvas');
-      canvas.width = 512; 
-      canvas.height = 512;
-      const ctx = canvas.getContext('2d');
-      ctx.filter = filter.css;
-      ctx.drawImage(neutralImg, 0, 0);
-      
-      const img = new Image();
-      img.src = canvas.toDataURL('image/png');
-      filter.lut_obj = img; // 真正的 WebGL LUT 物件
-    } else if (filter.id === 'normal') {
+    if (filter.id === 'normal') {
       filter.lut_obj = neutralImg;
     }
   }

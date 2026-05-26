@@ -212,7 +212,7 @@
               <canvas id="filtered-canvas" class="absolute inset-0 w-full h-full object-contain hidden"></canvas>
             <img id="filtered-img" class="absolute inset-0 w-full h-full object-contain" alt="Filtered preview of your photo">
             <img id="original-img" class="absolute inset-0 w-full h-full object-contain" alt="Original uploaded photo">
-            <input type="range" id="slider" aria-label="Before and after comparison slider" min="0" max="100" value="50" class="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-20 m-0" oninput="updateSlider()">
+            <input type="range" id="slider" aria-label="Before and after comparison slider" min="0" max="100" value="50" class="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-20 m-0" style="touch-action: none; -webkit-tap-highlight-color: transparent;" oninput="updateSlider()">
             <div id="slider-line" class="absolute top-0 bottom-0 w-[2px] bg-cyan-400 pointer-events-none z-10" style="left: 50%; transform: translateX(-50%)">
               <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-zinc-900 border-2 border-cyan-400 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(0,0,0,0.8)] backdrop-blur-sm">
                 <i data-lucide="chevron-left" class="w-4 h-4 text-zinc-300"></i>
