@@ -307,7 +307,8 @@ async function loadImageFile(file) {
     }
   }
 
-  // 自動在背景進行最佳化壓縮，避免高畫質照片塞爆瀏覽器記憶體
+  // 暫時完全停用 imageCompression 測試是否為黑畫面主因
+  /*
   try {
     const options = {
       maxSizeMB: 5,
@@ -319,6 +320,7 @@ async function loadImageFile(file) {
   } catch (error) {
     console.warn("壓縮處理失敗，改用原圖載入:", error);
   }
+  */
 
   const reader = new FileReader();
   reader.onload = (e) => {

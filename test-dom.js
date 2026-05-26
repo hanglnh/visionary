@@ -1,5 +1,5 @@
-const { JSDOM } = require('jsdom');
-const fs = require('fs');
+import { JSDOM } from 'jsdom';
+import fs from 'fs';
 const html = fs.readFileSync('index.html', 'utf-8');
 const dom = new JSDOM(html);
 const document = dom.window.document;
