@@ -89,7 +89,14 @@
       <div class="w-full flex flex-col items-center">
         <input type="file" id="file-input" accept="image/*,.cr2,.nef,.arw,.dng,.raf,.orf" class="hidden" onchange="handleFileUpload(event)">
 
-        <div id="upload-box"
+        <!-- ================= STEP 1: UPLOAD ================= -->
+        <div id="step-1" class="w-full flex flex-col items-center transition-all duration-700 animate-fade-in-up">
+          <div class="mb-8 bg-zinc-900 border border-zinc-700 text-zinc-300 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest flex items-center gap-2 shadow-lg z-10">
+            <span class="bg-cyan-500 text-black w-5 h-5 rounded-full flex items-center justify-center">1</span>
+            UPLOAD A PHOTO
+          </div>
+          
+          <div id="upload-box"
              class="w-full max-w-4xl aspect-[4/3] sm:aspect-video rounded-3xl border-2 border-dashed border-zinc-800/80 bg-zinc-900/40 backdrop-blur-md flex flex-col items-center justify-center cursor-pointer hover:border-cyan-500/50 hover:bg-zinc-800/60 transition-all focus:outline-none focus:ring-2 focus:ring-cyan-500 shadow-2xl relative overflow-hidden group"
              tabindex="0"
              role="button"
@@ -143,40 +150,43 @@
             <div class="absolute top-4 left-4 bg-black/60 backdrop-blur px-3 py-1 rounded text-xs font-bold tracking-widest z-10">BEFORE</div>
             <div class="absolute top-4 right-4 bg-black/60 backdrop-blur px-3 py-1 rounded text-xs font-bold tracking-widest text-cyan-400 z-10">AFTER</div>
           </div>
-          
-          <div class="flex flex-col sm:flex-row gap-4 mt-6 w-full">
-            <button onclick="clearImage()" class="px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors flex items-center gap-2">
-              <i data-lucide="trash-2" class="w-4 h-4"></i> Clear
-            </button>
-            <div class="hidden sm:block flex-1"></div>
-            <button onclick="downloadImage()" id="download-btn" class="px-6 py-2.5 rounded-lg text-sm font-bold bg-zinc-100 hover:bg-white text-black transition-colors flex items-center gap-2">
-              <i data-lucide="download" class="w-4 h-4"></i> Download JPG
-            </button>
-            <button id="share-btn" onclick="openShareModal()" disabled class="px-6 py-2.5 rounded-lg text-sm font-bold bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors flex items-center gap-2 shadow-[0_0_15px_rgba(8,145,178,0.4)]">
-              <i data-lucide="share-2" class="w-4 h-4"></i> Share to Explore
-            </button>
-          </div>
-          </div>
         </div>
-      </div>
-      
-      <div id="filter-controls" class="w-full max-w-3xl mt-12 opacity-40 pointer-events-none transition-opacity duration-300">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 px-2">
-          <div class="flex items-center gap-2">
-            <i data-lucide="sliders" class="w-4 h-4 text-zinc-400"></i>
-            <h3 class="text-sm font-semibold tracking-wider text-zinc-400 uppercase">Apply Presets</h3>
+        
+        <!-- ================= STEP 2: CHOOSE VIBE ================= -->
+        <div id="step-2" class="w-full max-w-4xl flex-col items-center hidden transition-all duration-700 opacity-0 transform translate-y-4 mt-8">
+          <div class="mb-6 bg-zinc-900 border border-zinc-700 text-zinc-300 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest inline-flex items-center gap-2 shadow-lg self-center mx-auto">
+            <span class="bg-cyan-500 text-black w-5 h-5 rounded-full flex items-center justify-center">2</span>
+            CHOOSE A VIBE
           </div>
-          <div class="flex items-center gap-2">
-            <button onclick="downloadLutTemplate()" class="text-xs font-bold bg-transparent hover:bg-zinc-800 text-zinc-400 hover:text-zinc-300 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 border border-zinc-700">
-              <i data-lucide="download" class="w-3.5 h-3.5"></i> Get Template
-            </button>
+
+          <div id="filter-controls" class="w-full max-w-3xl mx-auto transition-opacity duration-300">
             <button onclick="document.getElementById('lut-input').click()" class="text-xs font-bold bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 border border-zinc-700">
               <i data-lucide="upload" class="w-3.5 h-3.5"></i> Upload LUT (.png / .cube)
             </button>
           </div>
           <input type="file" id="lut-input" accept=".png, .cube" class="hidden" onchange="handleLutUpload(event)">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="system-filters-container"></div>
         </div>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="system-filters-container"></div>
+
+        <!-- ================= STEP 3: EXPORT & SHARE ================= -->
+        <div id="step-3" class="w-full flex-col items-center hidden transition-all duration-700 opacity-0 transform translate-y-4 mt-12 mb-12">
+          <div class="mb-6 bg-zinc-900 border border-zinc-700 text-zinc-300 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest inline-flex items-center gap-2 shadow-lg mx-auto">
+            <span class="bg-cyan-500 text-black w-5 h-5 rounded-full flex items-center justify-center">3</span>
+            EXPORT & SHARE
+          </div>
+          
+          <div class="flex flex-col sm:flex-row justify-center gap-4 w-full max-w-2xl mx-auto">
+            <button onclick="clearImage()" class="px-6 py-3 rounded-lg text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors flex items-center justify-center gap-2 border border-zinc-800">
+              <i data-lucide="trash-2" class="w-4 h-4"></i> Start Over
+            </button>
+            <button onclick="downloadImage()" id="download-btn" class="px-8 py-3 rounded-lg text-sm font-bold bg-zinc-100 hover:bg-white text-black transition-colors flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:scale-105">
+              <i data-lucide="download" class="w-4 h-4"></i> Download JPG
+            </button>
+            <button id="share-btn" onclick="openShareModal()" disabled class="px-8 py-3 rounded-lg text-sm font-bold bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(8,145,178,0.4)] hover:scale-105">
+              <i data-lucide="share-2" class="w-4 h-4"></i> Share to Explore
+            </button>
+          </div>
+        </div>
       </div>
     </section>
 

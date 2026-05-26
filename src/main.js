@@ -328,15 +328,16 @@ async function loadImageFile(file) {
     
     currentImageObj = new Image();
     currentImageObj.onload = () => {
-      document.getElementById('upload-box').classList.add('hidden');
-      const studioHeader = document.getElementById('studio-header');
-      if (studioHeader) studioHeader.classList.add('hidden');
-      const sampleImages = document.getElementById('sample-images');
-      if (sampleImages) sampleImages.classList.add('hidden');
+      document.getElementById('step-1').classList.add('hidden');
       
-      document.getElementById('preview-box').classList.remove('hidden');
-      document.getElementById('preview-box').classList.add('flex');
-      document.getElementById('filter-controls').classList.remove('opacity-40', 'pointer-events-none');
+      const step2 = document.getElementById('step-2');
+      if (step2) {
+        step2.classList.remove('hidden');
+        step2.classList.add('flex');
+        setTimeout(() => {
+          step2.classList.remove('opacity-0', 'translate-y-4');
+        }, 50);
+      }
       
       if (!webglFilter) {
         try {
@@ -914,6 +915,16 @@ function renderSystemFilters() {
 window.applyFilter = function(idOrObj) {
   currentFilter = typeof idOrObj === 'string' ? SYSTEM_FILTERS.find(f => f.id === idOrObj) : idOrObj;
   
+  // Show Step 3 if user chose any filter
+  const step3 = document.getElementById('step-3');
+  if (step3 && step3.classList.contains('hidden') && currentFilter.id !== 'normal') {
+    step3.classList.remove('hidden');
+    step3.classList.add('flex');
+    setTimeout(() => {
+      step3.classList.remove('opacity-0', 'translate-y-4');
+    }, 50);
+  }
+  
   const filteredImg = document.getElementById('filtered-img');
   const filteredCanvas = document.getElementById('filtered-canvas');
   
@@ -986,9 +997,33 @@ window.clearImage = function() {
   currentImageDataUrl = null;
   currentImageObj = null;
   document.getElementById('file-input').value = "";
-  document.getElementById('upload-box').classList.remove('hidden');
-  document.getElementById('preview-box').classList.add('hidden');
-  document.getElementById('preview-box').classList.remove('flex');
-  document.getElementById('filter-controls').classList.add('opacity-40', 'pointer-events-none');
+  
+  const step2 = document.getElementById('step-2');
+  if (step2) {
+    step2.classList.add('hidden', 'opacity-0', 'translate-y-4');
+    step2.classList.remove('flex');
+  }
+  const step3 = document.getElementById('step-3');
+  if (step3) {
+    step3.classList.add('hidden', 'opacity-0', 'translate-y-4');
+    step3.classList.remove('flex');
+  }
+  
+  const step1 = document.getElementById('step-1');
+  if (step1) {
+    step1.classList.remove('hidden');
+  }
+  
+  if (webglFilter) {
+    // 釋放 WebGL 資源
+    const gl = webglFilter.gl;
+    if (webglFilter.imageTexture) gl.deleteTexture(webglFilter.imageTexture);
+    if (webglFilter.lutTexture) gl.deleteTexture(webglFilter.lutTexture);
+    webglFilter.imageTexture = null;
+    webglFilter.lutTexture = null;
+  }
+  
   applyFilter(SYSTEM_FILTERS[0]);
+  renderSystemFilters();
+  showToast('照片已清除', 'success');
 };
