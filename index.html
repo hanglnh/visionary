@@ -135,29 +135,29 @@
           </div>
         </div>
 
-        <div id="preview-box" class="w-full max-w-4xl flex flex-col items-center">
-          <div class="sticky top-[10px] sm:static z-40 sm:z-auto bg-zinc-950/90 sm:bg-transparent backdrop-blur-xl sm:backdrop-blur-none pb-4 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0 transition-all w-full">
-            <div class="relative w-full aspect-[4/3] sm:aspect-video bg-black rounded-lg overflow-hidden ring-1 ring-white/10 shadow-2xl">
-              <canvas id="filtered-canvas" class="absolute inset-0 w-full h-full object-contain hidden"></canvas>
-            <img id="filtered-img" class="absolute inset-0 w-full h-full object-contain" alt="Filtered preview of your photo">
-            <img id="original-img" class="absolute inset-0 w-full h-full object-contain" alt="Original uploaded photo">
-            <input type="range" id="slider" aria-label="Before and after comparison slider" min="0" max="100" value="50" class="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-20 m-0" style="touch-action: none; -webkit-tap-highlight-color: transparent;" oninput="updateSlider()">
-            <div id="slider-line" class="absolute top-0 bottom-0 w-[2px] bg-cyan-400 pointer-events-none z-10" style="left: 50%; transform: translateX(-50%)">
-              <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-zinc-900 border-2 border-cyan-400 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(0,0,0,0.8)] backdrop-blur-sm">
-                <i data-lucide="chevron-left" class="w-4 h-4 text-zinc-300"></i>
-                <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-300 -ml-2"></i>
-              </div>
-            </div>
-            <div class="absolute top-4 left-4 bg-black/60 backdrop-blur px-3 py-1 rounded text-xs font-bold tracking-widest z-10">BEFORE</div>
-            <div class="absolute top-4 right-4 bg-black/60 backdrop-blur px-3 py-1 rounded text-xs font-bold tracking-widest text-cyan-400 z-10">AFTER</div>
-          </div>
-        </div>
-        
         <!-- ================= STEP 2: CHOOSE VIBE ================= -->
         <div id="step-2" class="w-full max-w-4xl flex-col items-center hidden transition-all duration-700 opacity-0 transform translate-y-4 mt-8">
           <div class="mb-6 bg-zinc-900 border border-zinc-700 text-zinc-300 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest inline-flex items-center gap-2 shadow-lg self-center mx-auto">
             <span class="bg-cyan-500 text-black w-5 h-5 rounded-full flex items-center justify-center">2</span>
             CHOOSE A VIBE
+          </div>
+
+          <div id="preview-box" class="w-full max-w-4xl flex flex-col items-center">
+            <div class="sticky top-[10px] sm:static z-40 sm:z-auto bg-zinc-950/90 sm:bg-transparent backdrop-blur-xl sm:backdrop-blur-none pb-4 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0 transition-all w-full">
+              <div class="relative w-full aspect-[4/3] sm:aspect-video bg-black rounded-lg overflow-hidden ring-1 ring-white/10 shadow-2xl">
+                <canvas id="filtered-canvas" class="absolute inset-0 w-full h-full object-contain hidden"></canvas>
+              <img id="filtered-img" class="absolute inset-0 w-full h-full object-contain" alt="Filtered preview of your photo">
+              <img id="original-img" class="absolute inset-0 w-full h-full object-contain" alt="Original uploaded photo">
+              <input type="range" id="slider" aria-label="Before and after comparison slider" min="0" max="100" value="50" class="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-20 m-0" style="touch-action: none; -webkit-tap-highlight-color: transparent;" oninput="updateSlider()">
+              <div id="slider-line" class="absolute top-0 bottom-0 w-[2px] bg-cyan-400 pointer-events-none z-10" style="left: 50%; transform: translateX(-50%)">
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-zinc-900 border-2 border-cyan-400 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(0,0,0,0.8)] backdrop-blur-sm">
+                  <i data-lucide="chevron-left" class="w-4 h-4 text-zinc-300"></i>
+                  <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-300 -ml-2"></i>
+                </div>
+              </div>
+              <div class="absolute top-4 left-4 bg-black/60 backdrop-blur px-3 py-1 rounded text-xs font-bold tracking-widest z-10">BEFORE</div>
+              <div class="absolute top-4 right-4 bg-black/60 backdrop-blur px-3 py-1 rounded text-xs font-bold tracking-widest text-cyan-400 z-10">AFTER</div>
+            </div>
           </div>
 
           <div id="filter-controls" class="w-full max-w-3xl mx-auto transition-opacity duration-300">

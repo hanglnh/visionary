@@ -312,7 +312,7 @@ async function loadImageFile(file) {
     const options = {
       maxSizeMB: 5,
       maxWidthOrHeight: 2560,
-      useWebWorker: true,
+      useWebWorker: false, // 停用 WebWorker 以避免在某些行動裝置/Safari上壓縮出純黑圖片
       initialQuality: 0.95 // 幾乎無損的品質
     };
     fileToLoad = await imageCompression(fileToLoad, options);
