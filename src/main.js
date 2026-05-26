@@ -329,6 +329,8 @@ async function loadImageFile(file) {
     currentImageObj = new Image();
     currentImageObj.onload = () => {
       document.getElementById('step-1').classList.add('hidden');
+      const studioHeader = document.getElementById('studio-header');
+      if (studioHeader) studioHeader.classList.add('hidden');
       
       const step2 = document.getElementById('step-2');
       if (step2) {
@@ -997,6 +999,9 @@ window.clearImage = function() {
   currentImageDataUrl = null;
   currentImageObj = null;
   document.getElementById('file-input').value = "";
+  
+  const studioHeader = document.getElementById('studio-header');
+  if (studioHeader) studioHeader.classList.remove('hidden');
   
   const step2 = document.getElementById('step-2');
   if (step2) {
