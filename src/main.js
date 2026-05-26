@@ -94,7 +94,7 @@ window.onload = async () => {
 function setupGestures() {
   let touchStartX = 0;
   let touchEndX = 0;
-  const tabs = ['home', 'studio', 'explore'];
+  const tabs = ['studio', 'explore'];
   
   document.addEventListener('touchstart', e => {
     touchStartX = e.changedTouches[0].screenX;
@@ -115,7 +115,7 @@ function setupGestures() {
     const diffX = touchStartX - touchEndX;
     const swipeThreshold = 80;
     
-    const currentTab = tabs.find(t => !document.getElementById(`section-${t}`)?.classList.contains('hidden')) || 'home';
+    const currentTab = tabs.find(t => !document.getElementById(`section-${t}`)?.classList.contains('hidden')) || 'studio';
     let currentTabIndex = tabs.indexOf(currentTab);
     
     if (diffX > swipeThreshold) {
@@ -255,16 +255,26 @@ window.handleLogout = async function() {
 };
 
 /* ================= 拖曳與檔案上傳邏輯 ================= */
-window.handleDrop = function(event) {
-  event.preventDefault();
+window.handleDrop = function(e) {
+  e.preventDefault();
   document.getElementById('upload-box').classList.remove('drag-over');
-  const file = event.dataTransfer.files[0];
-  
-  if (file) {
-    const isImage = file.type.startsWith('image/');
-    const rawExtensions = ['.cr2', '.nef', '.arw', '.dng', '.raf', '.orf'];
-    const isRaw = rawExtensions.some(ext => file.name.toLowerCase().endsWith(ext));
-    if (isImage || isRaw) loadImageFile(file);
+  const file = e.dataTransfer.files[0];
+  if (file && (file.type.startsWith('image/') || isRawFile(file))) {
+    loadImageFile(file);
+  } else {
+    showToast('請上傳圖片格式檔案 (支援 JPG/PNG/RAW)', 'error');
+  }
+};
+
+window.loadSampleImage = async function(url) {
+  try {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const file = new File([blob], "sample.jpg", { type: "image/jpeg" });
+    loadImageFile(file);
+  } catch (error) {
+    showToast('載入範例圖片失敗', 'error');
+    console.error(error);
   }
 };
 
@@ -316,6 +326,11 @@ async function loadImageFile(file) {
     currentImageObj = new Image();
     currentImageObj.onload = () => {
       document.getElementById('upload-box').classList.add('hidden');
+      const studioHeader = document.getElementById('studio-header');
+      if (studioHeader) studioHeader.classList.add('hidden');
+      const sampleImages = document.getElementById('sample-images');
+      if (sampleImages) sampleImages.classList.add('hidden');
+      
       document.getElementById('preview-box').classList.remove('hidden');
       document.getElementById('preview-box').classList.add('flex');
       document.getElementById('filter-controls').classList.remove('opacity-40', 'pointer-events-none');
@@ -829,76 +844,56 @@ window.mockLogout = function() {
 };
 
 window.switchTab = function(tabName) {
-  // 隱藏所有 section
-  ['home', 'studio', 'explore', 'mock-login', 'mock-user', 'mock-admin'].forEach(tab => {
-    const el = document.getElementById(`section-${tab}`);
-    if (el) {
-      el.classList.add('hidden');
-      el.classList.remove('flex');
-    }
-    
-    // 取消原本的標籤狀態
-    if (['home', 'studio', 'explore'].includes(tab)) {
-      const tabBtn = document.getElementById(`tab-${tab}`);
-      if (tabBtn) {
-        tabBtn.className = `tab-btn flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 rounded-full text-sm font-bold text-zinc-500 hover:text-zinc-300 transition-all`;
-        tabBtn.setAttribute('aria-selected', 'false');
-      }
-      const mobileBtn = document.getElementById(`tab-${tab}-mobile`);
-      if (mobileBtn) {
-        mobileBtn.className = 'mobile-tab-btn flex flex-col items-center p-2 text-zinc-500 transition-colors';
+  // Mobile Nav UI
+  ['studio', 'explore'].forEach(t => {
+    const btn = document.getElementById(`tab-${t}-mobile`);
+    if(btn) {
+      if (t === tabName) {
+        btn.classList.add('text-cyan-400');
+        btn.classList.remove('text-zinc-500');
+      } else {
+        btn.classList.remove('text-cyan-400');
+        btn.classList.add('text-zinc-500');
       }
     }
   });
 
-  // Mock 路由守衛 (Route Guard)
-  if (tabName.startsWith('mock-') && tabName !== 'mock-login') {
-    const token = localStorage.getItem('mock_token');
-    const userStr = localStorage.getItem('mock_user');
-    const user = userStr ? JSON.parse(userStr) : null;
+  // Desktop Nav UI
+  ['studio', 'explore'].forEach(t => {
+    const btn = document.getElementById(`tab-${t}`);
+    if(btn) {
+      if (t === tabName) {
+        btn.classList.add('bg-zinc-800', 'text-cyan-400');
+        btn.classList.remove('text-zinc-500', 'hover:text-zinc-300');
+        btn.setAttribute('aria-selected', 'true');
+      } else {
+        btn.classList.remove('bg-zinc-800', 'text-cyan-400');
+        btn.classList.add('text-zinc-500', 'hover:text-zinc-300');
+        btn.setAttribute('aria-selected', 'false');
+      }
+    }
+  });
 
-    if (!token) {
-      showToast('未授權，請重登入', 'error');
-      return switchTab('mock-login');
+  // Toggle Sections
+  const allSections = document.querySelectorAll('section[id^="section-"]');
+  allSections.forEach(section => {
+    if (section.id === `section-${tabName}`) {
+      section.classList.remove('hidden');
+      if(tabName !== 'home') section.classList.add('flex');
+      setTimeout(() => {
+        section.style.opacity = '1';
+      }, 10);
+    } else {
+      section.classList.add('hidden');
+      section.classList.remove('flex');
+      section.style.opacity = '0';
     }
+  });
 
-    if (tabName === 'mock-admin' && user?.role !== 'admin') {
-      showToast('您沒有管理員權限！將被重定向', 'error');
-      return switchTab('mock-user');
-    }
-    
-    // 如果是管理員存取 user 頁面，可以放行或導向 admin (這裡選擇放行或自動導向)
-    if (tabName === 'mock-user' && user?.role === 'admin') {
-      return switchTab('mock-admin');
-    }
-  }
-  
-  const targetEl = document.getElementById(`section-${tabName}`);
-  if (targetEl) {
-    targetEl.classList.remove('hidden');
-    targetEl.classList.add('flex');
-  }
-  
-  if (['home', 'studio', 'explore'].includes(tabName)) {
+  if (['studio', 'explore'].includes(tabName)) {
     // 手機端震動回饋 (Haptics)
     if (navigator.vibrate) navigator.vibrate(15);
-    
-    const targetBtn = document.getElementById(`tab-${tabName}`);
-    if (targetBtn) {
-      let colorClass = tabName === 'studio' ? 'bg-zinc-800 text-cyan-400 shadow-lg' : (tabName === 'explore' ? 'bg-zinc-800 text-rose-400 shadow-lg' : 'bg-zinc-800 text-white shadow-lg');
-      targetBtn.className = `tab-btn flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 rounded-full text-sm font-bold transition-all ${colorClass}`;
-      targetBtn.setAttribute('aria-selected', 'true');
-    }
   }
-  
-  // Mobile tab active state
-  const targetMobileBtn = document.getElementById(`tab-${tabName}-mobile`);
-  if (targetMobileBtn) {
-    let mobileColorClass = tabName === 'studio' ? 'text-cyan-400' : (tabName === 'explore' ? 'text-rose-400' : 'text-white');
-    targetMobileBtn.className = `mobile-tab-btn flex flex-col items-center p-2 transition-colors ${mobileColorClass}`;
-  }
-  
-  window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
 window.updateSlider = function() {
