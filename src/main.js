@@ -930,12 +930,10 @@ window.applyFilter = function(idOrObj) {
   const filteredImg = document.getElementById('filtered-img');
   const filteredCanvas = document.getElementById('filtered-canvas');
   
-  // 現在系統已經 100% 走 WebGL 渲染，全部使用 lut_url 或 lut_obj
   if (currentFilter.lut_url || currentFilter.lut_obj) {
-    filteredImg.classList.add('hidden');
-    filteredCanvas.classList.remove('hidden');
-    
     if (currentFilter.lut_obj && currentImageObj && webglFilter) {
+      filteredImg.classList.add('hidden');
+      filteredCanvas.classList.remove('hidden');
       try {
         webglFilter.render(currentImageObj, currentFilter.lut_obj);
       } catch (e) {
@@ -943,16 +941,24 @@ window.applyFilter = function(idOrObj) {
         fallbackToCSS();
       }
     } else if (currentFilter.lut_url && currentImageObj && webglFilter) {
+      // 網路載入期間，先用 CSS 濾鏡墊檔，避免畫面黑掉
+      fallbackToCSS();
+      
       const lutImg = new Image();
       lutImg.crossOrigin = 'anonymous';
       lutImg.onload = () => {
-        currentFilter.lut_obj = lutImg;
+        currentFilter.lut_obj = lutImg; // 存入記憶體
         try {
           webglFilter.render(currentImageObj, lutImg);
+          // 渲染成功後，切換回 WebGL 顯示
+          filteredImg.classList.add('hidden');
+          filteredCanvas.classList.remove('hidden');
         } catch (e) {
           console.warn('WebGL render failed, falling back to CSS:', e);
-          fallbackToCSS();
         }
+      };
+      lutImg.onerror = () => {
+        console.warn('LUT image failed to load');
       };
       lutImg.src = currentFilter.lut_url;
     } else {
