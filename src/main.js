@@ -44,7 +44,7 @@ let isMockMode = false;
 
 // Pagination variables
 let currentPage = 0;
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 50;
 let hasMorePosts = true;
 let isFetchingPosts = false;
 let observer = null;
