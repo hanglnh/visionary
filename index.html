@@ -46,6 +46,9 @@
       <button onclick="switchTab('explore')" id="tab-explore" role="tab" aria-selected="false" aria-controls="section-explore" class="tab-btn flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 rounded-full text-sm font-bold text-zinc-500 hover:text-zinc-300 transition-all">
         <i data-lucide="compass" class="w-4 h-4"></i> <span class="hidden sm:inline">Explore</span>
       </button>
+      <button onclick="switchTab('about')" id="tab-about" role="tab" aria-selected="false" aria-controls="section-about" class="tab-btn flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 rounded-full text-sm font-bold text-zinc-500 hover:text-zinc-300 transition-all">
+        <i data-lucide="info" class="w-4 h-4"></i> <span class="hidden sm:inline">About</span>
+      </button>
     </div>
 
     <!-- 會員狀態按鈕 -->
@@ -75,30 +78,29 @@
       <i data-lucide="compass" class="w-5 h-5 mb-1"></i>
       <span class="text-[10px] font-bold">Explore</span>
     </button>
+    <button onclick="switchTab('about')" id="tab-about-mobile" class="mobile-tab-btn flex flex-col items-center p-2 text-zinc-500 transition-colors">
+      <i data-lucide="info" class="w-5 h-5 mb-1"></i>
+      <span class="text-[10px] font-bold">About</span>
+    </button>
   </nav>
 
-  <main class="max-w-6xl mx-auto px-4 py-8 relative z-10">
+  <main class="max-w-6xl mx-auto px-4 py-2 sm:py-4 relative z-10">
     
 
     <!-- ================= 工作室 (Studio) ================= -->
-    <section id="section-studio" class="flex flex-col items-center transition-opacity duration-500 min-h-[70vh] justify-center pt-8 sm:pt-16">
-      <div class="text-center mb-8 mt-4" id="studio-header">
-        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tighter mb-2 text-white">CREATE & TEST.</h2>
+    <section id="section-studio" class="flex flex-col items-center transition-opacity duration-500 min-h-[60vh] justify-center pt-2 sm:pt-4">
+      <div class="text-center mb-4 sm:mb-6 mt-0 sm:mt-2 transition-all duration-500" id="studio-header">
+        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tighter mb-1 text-white">CREATE & TEST.</h2>
         <p class="text-zinc-400 text-sm">Upload your photo, test presets, and export.</p>
       </div>
 
       <div class="w-full flex flex-col items-center">
         <input type="file" id="file-input" accept="image/*,.cr2,.nef,.arw,.dng,.raf,.orf" class="hidden" onchange="handleFileUpload(event)">
 
-        <!-- ================= STEP 1: UPLOAD ================= -->
-        <div id="step-1" class="w-full flex flex-col items-center transition-all duration-700 animate-fade-in-up">
-          <div class="mb-8 bg-zinc-900 border border-zinc-700 text-zinc-300 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest flex items-center gap-2 shadow-lg z-10">
-            <span class="bg-cyan-500 text-black w-5 h-5 rounded-full flex items-center justify-center">1</span>
-            UPLOAD A PHOTO
-          </div>
-          
+        <!-- ================= UPLOAD SECTION ================= -->
+        <div id="upload-section" class="w-full flex flex-col items-center transition-all duration-700 animate-fade-in-up">
           <div id="upload-box"
-             class="w-full max-w-4xl aspect-[4/3] sm:aspect-video rounded-3xl border-2 border-dashed border-zinc-800/80 bg-zinc-900/40 backdrop-blur-md flex flex-col items-center justify-center cursor-pointer hover:border-cyan-500/50 hover:bg-zinc-800/60 transition-all focus:outline-none focus:ring-2 focus:ring-cyan-500 shadow-2xl relative overflow-hidden group"
+             class="w-full max-w-4xl py-12 px-4 sm:py-0 aspect-auto sm:aspect-video rounded-3xl border-2 border-dashed border-zinc-800/80 bg-zinc-900/40 backdrop-blur-md flex flex-col items-center justify-center cursor-pointer hover:border-cyan-500/50 hover:bg-zinc-800/60 transition-all focus:outline-none focus:ring-2 focus:ring-cyan-500 shadow-2xl relative overflow-hidden group"
              tabindex="0"
              role="button"
              aria-label="Upload photo area"
@@ -108,12 +110,12 @@
              ondragleave="this.classList.remove('drag-over')"
              onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); document.getElementById('file-input').click(); }">
           <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-          <div class="bg-zinc-900 p-5 rounded-full mb-6 border border-zinc-800 shadow-xl group-hover:scale-110 transition-transform duration-500">
+          <div class="bg-zinc-900 p-4 sm:p-5 rounded-full mb-4 sm:mb-6 border border-zinc-800 shadow-xl group-hover:scale-110 transition-transform duration-500">
             <i data-lucide="image-plus" class="w-10 h-10 text-cyan-400"></i>
           </div>
-          <p class="text-2xl font-bold mb-3 tracking-wide">Drag & Drop your photo here</p>
-          <p class="text-sm text-zinc-500 max-w-sm text-center mb-6">支援 JPG / PNG / RAW (CR2, NEF, ARW)<br/>也支援 Cmd+V / Ctrl+V 直接貼上圖片</p>
-          <button class="px-6 py-2.5 bg-white text-black font-bold rounded-full text-sm hover:scale-105 transition-transform pointer-events-none">Browser Files</button>
+          <p class="text-xl sm:text-2xl font-bold mb-2 sm:mb-3 tracking-wide text-center">Drag & Drop your photo here</p>
+          <p class="text-xs sm:text-sm text-zinc-500 max-w-sm text-center mb-6">支援 JPG / PNG / RAW (CR2, NEF, ARW)<br class="hidden sm:block"/>也支援 Cmd+V / Ctrl+V 直接貼上圖片</p>
+          <button class="px-6 py-2.5 bg-white text-black font-bold rounded-full text-sm hover:scale-105 transition-transform pointer-events-none">Browse Files</button>
         </div>
 
         <div id="sample-images" class="mt-12 flex flex-col items-center w-full max-w-4xl">
@@ -133,18 +135,15 @@
               <img src="https://images.unsplash.com/photo-1514924013411-cbf25faa35bb?w=400&q=80" alt="Sample Portrait" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" crossorigin="anonymous">
             </button>
           </div>
-        </div>
+        </div> <!-- Close sample-images -->
+        </div> <!-- Close sample-images -->
+        </div> <!-- Close upload-section -->
 
-        <!-- ================= STEP 2: CHOOSE VIBE ================= -->
-        <div id="step-2" class="w-full max-w-4xl flex-col items-center hidden transition-all duration-700 opacity-0 transform translate-y-4 mt-8">
-          <div class="mb-6 bg-zinc-900 border border-zinc-700 text-zinc-300 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest inline-flex items-center gap-2 shadow-lg self-center mx-auto">
-            <span class="bg-cyan-500 text-black w-5 h-5 rounded-full flex items-center justify-center">2</span>
-            CHOOSE A VIBE
-          </div>
-
+        <!-- ================= EDITOR SECTION ================= -->
+        <div id="editor-section" class="w-full max-w-4xl flex-col items-center hidden transition-all duration-700 opacity-0 mt-2 sm:mt-4">
           <div id="preview-box" class="w-full max-w-4xl flex flex-col items-center">
             <div class="sticky top-[10px] sm:static z-40 sm:z-auto bg-zinc-950/90 sm:bg-transparent backdrop-blur-xl sm:backdrop-blur-none pb-4 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0 transition-all w-full">
-              <div class="relative w-full aspect-[4/3] sm:aspect-video bg-black rounded-lg overflow-hidden ring-1 ring-white/10 shadow-2xl">
+              <div class="relative w-full aspect-[4/3] sm:aspect-video max-h-[55vh] bg-black rounded-lg overflow-hidden ring-1 ring-white/10 shadow-2xl">
                 <canvas id="filtered-canvas" class="absolute inset-0 w-full h-full object-contain hidden"></canvas>
               <img id="filtered-img" class="absolute inset-0 w-full h-full object-contain" alt="Filtered preview of your photo">
               <img id="original-img" class="absolute inset-0 w-full h-full object-contain" alt="Original uploaded photo">
@@ -160,25 +159,19 @@
             </div>
           </div>
 
-          <div id="filter-controls" class="w-full max-w-3xl mx-auto transition-opacity duration-300">
+          <input type="file" id="lut-input" accept=".png, .cube" class="hidden" onchange="handleLutUpload(event)">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5 w-full" id="system-filters-container"></div>
+          
+          <div id="filter-controls" class="w-full max-w-3xl mx-auto flex justify-center mt-4 transition-opacity duration-300 mb-5">
             <button onclick="document.getElementById('lut-input').click()" class="text-xs font-bold bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 border border-zinc-700">
               <i data-lucide="upload" class="w-3.5 h-3.5"></i> Upload LUT (.png / .cube)
             </button>
           </div>
-          <input type="file" id="lut-input" accept=".png, .cube" class="hidden" onchange="handleLutUpload(event)">
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="system-filters-container"></div>
-        </div>
-
-        <!-- ================= STEP 3: EXPORT & SHARE ================= -->
-        <div id="step-3" class="w-full flex-col items-center hidden transition-all duration-700 opacity-0 transform translate-y-4 mt-12 mb-12">
-          <div class="mb-6 bg-zinc-900 border border-zinc-700 text-zinc-300 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest inline-flex items-center gap-2 shadow-lg mx-auto">
-            <span class="bg-cyan-500 text-black w-5 h-5 rounded-full flex items-center justify-center">3</span>
-            EXPORT & SHARE
-          </div>
           
-          <div class="flex flex-col sm:flex-row justify-center gap-4 w-full max-w-2xl mx-auto">
+          <!-- EXPORT & SHARE BUTTONS -->
+          <div class="flex flex-col sm:flex-row justify-center gap-4 w-full max-w-2xl mx-auto mt-2 mb-4">
             <button onclick="clearImage()" class="px-6 py-3 rounded-lg text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors flex items-center justify-center gap-2 border border-zinc-800">
-              <i data-lucide="trash-2" class="w-4 h-4"></i> Start Over
+              <i data-lucide="trash-2" class="w-4 h-4"></i> Clear
             </button>
             <button onclick="downloadImage()" id="download-btn" class="px-8 py-3 rounded-lg text-sm font-bold bg-zinc-100 hover:bg-white text-black transition-colors flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:scale-105">
               <i data-lucide="download" class="w-4 h-4"></i> Download JPG
@@ -186,6 +179,99 @@
             <button id="share-btn" onclick="openShareModal()" disabled class="px-8 py-3 rounded-lg text-sm font-bold bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(8,145,178,0.4)] hover:scale-105">
               <i data-lucide="share-2" class="w-4 h-4"></i> Share to Explore
             </button>
+          </div>
+        </div> <!-- Close editor-section -->
+      </div>
+    </section>
+
+    <!-- ================= 關於我們 (About Us) ================= -->
+    <section id="section-about" class="hidden flex-col items-center w-full pt-10 sm:pt-20 transition-opacity duration-500 relative">
+      <!-- Hero 背景圖片 (淡入淡出效果) -->
+      <div class="absolute inset-0 top-[-5rem] left-1/2 -translate-x-1/2 w-[100vw] pointer-events-none z-[-1]">
+        <div class="absolute inset-0 bg-[url('/visionary/images/background.jpg')] bg-cover bg-center bg-no-repeat opacity-60 mix-blend-luminosity"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-zinc-950/60 via-transparent via-20% to-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 via-30% to-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-zinc-950/40 via-transparent via-10% to-zinc-950/40 to-90%"></div>
+      </div>
+      <div class="text-center max-w-4xl mx-auto px-4 mb-20">
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800 text-cyan-400 text-sm font-bold tracking-widest mb-8">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          <span>NEXT-GEN COLOR GRADING</span>
+        </div>
+        <h2 class="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tighter mb-6 leading-tight text-white drop-shadow-2xl">
+          CINEMATIC TONES.<br/>IN YOUR BROWSER.
+        </h2>
+        <p class="text-zinc-400 text-lg sm:text-xl leading-relaxed max-w-2xl mx-auto mb-10">
+          專為攝影師打造的線上濾鏡預覽平台。無須安裝任何軟體，直接在瀏覽器中即時體驗專業電影級調色，並探索來自全球社群的獨家配方。
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <button onclick="switchTab('studio')" class="w-full sm:w-auto px-8 py-4 bg-cyan-600 hover:bg-cyan-500 text-white rounded-full font-bold text-lg tracking-wide transition-all duration-300 shadow-[0_0_30px_rgba(8,145,178,0.3)] hover:shadow-[0_0_40px_rgba(8,145,178,0.5)] flex items-center justify-center gap-2 group">
+            Enter Studio <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+          </button>
+          <button onclick="switchTab('explore')" class="w-full sm:w-auto px-8 py-4 bg-zinc-900 border border-zinc-700 hover:border-zinc-500 hover:bg-zinc-800 text-white rounded-full font-bold text-lg tracking-wide transition-all duration-300 flex items-center justify-center gap-2">
+            Explore Community
+          </button>
+        </div>
+      </div>
+
+      <div class="w-full grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-24">
+        <div class="bg-zinc-900/50 border border-zinc-800/50 p-8 rounded-2xl flex flex-col items-start backdrop-blur-sm hover:bg-zinc-900 transition-colors">
+          <div class="w-12 h-12 bg-rose-500/10 rounded-xl flex items-center justify-center mb-6 border border-rose-500/20">
+            <i data-lucide="zap" class="w-6 h-6 text-rose-500"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-3">即時預覽渲染</h3>
+          <p class="text-zinc-400 text-sm leading-relaxed">採用先進的 Web 端濾鏡模擬技術，滑動對比拉桿時無延遲，提供絲滑流暢的預覽體驗。</p>
+        </div>
+        <div class="bg-zinc-900/50 border border-zinc-800/50 p-8 rounded-2xl flex flex-col items-start backdrop-blur-sm hover:bg-zinc-900 transition-colors">
+          <div class="w-12 h-12 bg-cyan-500/10 rounded-xl flex items-center justify-center mb-6 border border-cyan-500/20">
+            <i data-lucide="lock" class="w-6 h-6 text-cyan-400"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-3">100% 本地處理</h3>
+          <p class="text-zinc-400 text-sm leading-relaxed">您的照片永遠不會被上傳到任何伺服器。所有的影像運算皆在您的設備本地完成，保障絕對隱私。</p>
+        </div>
+        <div class="bg-zinc-900/50 border border-zinc-800/50 p-8 rounded-2xl flex flex-col items-start backdrop-blur-sm hover:bg-zinc-900 transition-colors">
+          <div class="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center mb-6 border border-emerald-500/20">
+            <i data-lucide="share-2" class="w-6 h-6 text-emerald-400"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-3">社群交流生態</h3>
+          <p class="text-zinc-400 text-sm leading-relaxed">測試滿意後，一鍵打包您的專屬配方發布至社群，與全世界的攝影同好互相探索與交流。</p>
+        </div>
+      </div>
+
+      <div class="w-full max-w-6xl mx-auto border-t border-zinc-800/50 pt-20 pb-10 text-center">
+        <h3 class="text-2xl font-bold mb-12 tracking-wide">HOW TO USE</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 relative px-4">
+          <div class="group relative flex flex-col items-center bg-zinc-900/40 border border-zinc-800/50 rounded-2xl p-6 overflow-hidden hover:bg-zinc-800/80 transition-all duration-500 cursor-default">
+            <div class="w-16 h-16 rounded-full bg-zinc-900 border-2 border-zinc-700 flex items-center justify-center mb-4 shadow-lg text-xl font-bold text-zinc-300 z-10 transition-all duration-500 group-hover:opacity-0 group-hover:-translate-y-2">1</div>
+            <h4 class="font-bold text-zinc-200 text-lg mb-2 transition-all duration-500 group-hover:opacity-0 group-hover:-translate-y-2">上傳照片與 LUT</h4>
+            <p class="text-sm text-zinc-400 mb-4 transition-opacity duration-300 group-hover:opacity-0">拖曳圖片開始調色...</p>
+            <div class="absolute inset-x-0 bottom-0 p-6 pt-0 translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out bg-gradient-to-t from-zinc-800/95 via-zinc-800/90 to-transparent">
+              <p class="text-xs text-zinc-300 leading-relaxed text-left">進入 Studio 頁面，將照片拖曳至工作區。系統支援 JPG/PNG。底層架構支援讀取標準的 <strong>HaldCLUT PNG</strong>，實現 100% 精準本地渲染。</p>
+            </div>
+          </div>
+          <div class="group relative flex flex-col items-center bg-zinc-900/40 border border-zinc-800/50 rounded-2xl p-6 overflow-hidden hover:bg-zinc-800/80 transition-all duration-500 cursor-default">
+            <div class="w-16 h-16 rounded-full bg-zinc-900 border-2 border-cyan-500 flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(6,182,212,0.3)] text-xl font-bold text-cyan-400 z-10 transition-all duration-500 group-hover:opacity-0 group-hover:-translate-y-2">2</div>
+            <h4 class="font-bold text-zinc-200 text-lg mb-2 transition-all duration-500 group-hover:opacity-0 group-hover:-translate-y-2">即時預覽與分享</h4>
+            <p class="text-sm text-zinc-400 mb-4 transition-opacity duration-300 group-hover:opacity-0">發布您的專屬調色...</p>
+            <div class="absolute inset-x-0 bottom-0 p-6 pt-0 translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out bg-gradient-to-t from-zinc-800/95 via-zinc-800/90 to-transparent">
+              <p class="text-xs text-zinc-300 leading-relaxed text-left">使用拉桿無延遲對比。滿意的話點擊「Share to Community」，輸入名稱與 <strong>IG 帳號</strong>，這組配方就會發布到公共社群牆。</p>
+            </div>
+          </div>
+          <div class="group relative flex flex-col items-center bg-zinc-900/40 border border-zinc-800/50 rounded-2xl p-6 overflow-hidden hover:bg-zinc-800/80 transition-all duration-500 cursor-default">
+            <div class="w-16 h-16 rounded-full bg-zinc-900 border-2 border-rose-500 flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(225,29,72,0.3)] text-xl font-bold text-rose-400 z-10 transition-all duration-500 group-hover:opacity-0 group-hover:-translate-y-2">3</div>
+            <h4 class="font-bold text-zinc-200 text-lg mb-2 transition-all duration-500 group-hover:opacity-0 group-hover:-translate-y-2">探索大師作品</h4>
+            <p class="text-sm text-zinc-400 mb-4 transition-opacity duration-300 group-hover:opacity-0">一鍵帶回工作室測試...</p>
+            <div class="absolute inset-x-0 bottom-0 p-6 pt-0 translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out bg-gradient-to-t from-zinc-800/95 via-zinc-800/90 to-transparent">
+              <p class="text-xs text-zinc-300 leading-relaxed text-left">切換到 Explore 頁面。看到喜歡的風格，只需點擊 <strong>「Try Preset」</strong>，系統就會自動將配方帶回工作室，套用在您的照片上。</p>
+            </div>
+          </div>
+          <div class="group relative flex flex-col items-center bg-zinc-900/40 border border-zinc-800/50 rounded-2xl p-6 overflow-hidden hover:bg-zinc-800/80 transition-all duration-500 cursor-default">
+            <div class="w-16 h-16 rounded-full bg-zinc-900 border-2 border-emerald-500 flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(16,185,129,0.3)] text-xl font-bold text-emerald-400 z-10 transition-all duration-500 group-hover:opacity-0 group-hover:-translate-y-2">4</div>
+            <h4 class="font-bold text-zinc-200 text-lg mb-2 transition-all duration-500 group-hover:opacity-0 group-hover:-translate-y-2">索取原始檔案</h4>
+            <p class="text-sm text-zinc-400 mb-4 transition-opacity duration-300 group-hover:opacity-0">連結 IG 取得 Preset...</p>
+            <div class="absolute inset-x-0 bottom-0 p-6 pt-0 translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out bg-gradient-to-t from-zinc-800/95 via-zinc-800/90 to-transparent">
+              <p class="text-xs text-zinc-300 leading-relaxed text-left">本平台提供預覽體驗。當您找到完美濾鏡後，點擊 <strong>Instagram 圖示</strong> 跳轉至作者頁面，私訊索取原始 XMP 或 LUT 檔案！</p>
+            </div>
           </div>
         </div>
       </div>

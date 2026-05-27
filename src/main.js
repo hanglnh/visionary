@@ -59,11 +59,7 @@ async function initSystemLUTs() {
     neutralImg.onerror = resolve; // Fallback if image missing
   });
 
-  for (let filter of SYSTEM_FILTERS) {
-    if (filter.id === 'normal') {
-      filter.lut_obj = neutralImg;
-    }
-  }
+
 }
 
 window.onload = async () => {
@@ -307,8 +303,7 @@ async function loadImageFile(file) {
     }
   }
 
-  // 暫時完全停用 imageCompression 測試是否為黑畫面主因
-  /*
+  // 自動在背景進行最佳化壓縮，避免高畫質照片塞爆瀏覽器記憶體
   try {
     const options = {
       maxSizeMB: 5,
@@ -320,7 +315,6 @@ async function loadImageFile(file) {
   } catch (error) {
     console.warn("壓縮處理失敗，改用原圖載入:", error);
   }
-  */
 
   const reader = new FileReader();
   reader.onload = (e) => {
@@ -330,16 +324,19 @@ async function loadImageFile(file) {
     
     currentImageObj = new Image();
     currentImageObj.onload = () => {
-      document.getElementById('step-1').classList.add('hidden');
-      const studioHeader = document.getElementById('studio-header');
-      if (studioHeader) studioHeader.classList.add('hidden');
+      document.getElementById('upload-section').classList.add('hidden');
       
-      const step2 = document.getElementById('step-2');
-      if (step2) {
-        step2.classList.remove('hidden');
-        step2.classList.add('flex');
+      const studioHeader = document.getElementById('studio-header');
+      if (studioHeader) {
+        studioHeader.classList.add('hidden');
+      }
+      
+      const editorSection = document.getElementById('editor-section');
+      if (editorSection) {
+        editorSection.classList.remove('hidden');
+        editorSection.classList.add('flex');
         setTimeout(() => {
-          step2.classList.remove('opacity-0', 'translate-y-4');
+          editorSection.classList.remove('opacity-0');
         }, 50);
       }
       
@@ -852,32 +849,43 @@ window.mockLogout = function() {
 };
 
 window.switchTab = function(tabName) {
-  // Mobile Nav UI
-  ['studio', 'explore'].forEach(t => {
-    const btn = document.getElementById(`tab-${t}-mobile`);
-    if(btn) {
-      if (t === tabName) {
-        btn.classList.add('text-cyan-400');
-        btn.classList.remove('text-zinc-500');
-      } else {
-        btn.classList.remove('text-cyan-400');
-        btn.classList.add('text-zinc-500');
-      }
+  const tabs = ['studio', 'explore', 'about', 'mock-login', 'mock-user', 'mock-admin'];
+  const isMobileNav = document.querySelector('.mobile-tab-btn');
+  
+  // 更新內容顯示
+  tabs.forEach(tab => {
+    const mobileBtn = document.getElementById(`tab-${tab}-mobile`);
+    if (mobileBtn) {
+      mobileBtn.className = `mobile-tab-btn flex flex-col items-center p-2 text-zinc-500 transition-colors`;
     }
   });
+  
+  if (isMobileNav) {
+    const activeMobileBtn = document.getElementById(`tab-${tabName}-mobile`);
+    if (activeMobileBtn) {
+      let mobileColorClass = 'text-white';
+      if (tabName === 'studio') mobileColorClass = 'text-cyan-400';
+      if (tabName === 'explore') mobileColorClass = 'text-rose-400';
+      if (tabName === 'about') mobileColorClass = 'text-emerald-400';
+      activeMobileBtn.className = `mobile-tab-btn flex flex-col items-center p-2 transition-colors ${mobileColorClass}`;
+    }
+  }
 
   // Desktop Nav UI
-  ['studio', 'explore'].forEach(t => {
-    const btn = document.getElementById(`tab-${t}`);
-    if(btn) {
+  tabs.forEach(t => {
+    const targetBtn = document.getElementById(`tab-${t}`);
+    if (targetBtn) {
       if (t === tabName) {
-        btn.classList.add('bg-zinc-800', 'text-cyan-400');
-        btn.classList.remove('text-zinc-500', 'hover:text-zinc-300');
-        btn.setAttribute('aria-selected', 'true');
+        let colorClass = 'bg-zinc-800 text-white shadow-lg';
+        if (tabName === 'studio') colorClass = 'bg-zinc-800 text-cyan-400 shadow-lg';
+        if (tabName === 'explore') colorClass = 'bg-zinc-800 text-rose-400 shadow-lg';
+        if (tabName === 'about') colorClass = 'bg-zinc-800 text-emerald-400 shadow-lg';
+        
+        targetBtn.className = `tab-btn flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 rounded-full text-sm font-bold transition-all ${colorClass}`;
+        targetBtn.setAttribute('aria-selected', 'true');
       } else {
-        btn.classList.remove('bg-zinc-800', 'text-cyan-400');
-        btn.classList.add('text-zinc-500', 'hover:text-zinc-300');
-        btn.setAttribute('aria-selected', 'false');
+        targetBtn.className = 'tab-btn flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 rounded-full text-sm font-bold text-zinc-500 hover:text-zinc-300 transition-all';
+        targetBtn.setAttribute('aria-selected', 'false');
       }
     }
   });
@@ -918,17 +926,7 @@ function renderSystemFilters() {
 
 window.applyFilter = function(idOrObj) {
   currentFilter = typeof idOrObj === 'string' ? SYSTEM_FILTERS.find(f => f.id === idOrObj) : idOrObj;
-  
-  // Show Step 3 if user chose any filter
-  const step3 = document.getElementById('step-3');
-  if (step3 && step3.classList.contains('hidden') && currentFilter.id !== 'normal') {
-    step3.classList.remove('hidden');
-    step3.classList.add('flex');
-    setTimeout(() => {
-      step3.classList.remove('opacity-0', 'translate-y-4');
-    }, 50);
-  }
-  
+  // 編輯區顯示時按鈕就已經可見，不再需要單獨控制 step-3
   const filteredImg = document.getElementById('filtered-img');
   const filteredCanvas = document.getElementById('filtered-canvas');
   
@@ -1002,23 +1000,20 @@ window.clearImage = function() {
   currentImageObj = null;
   document.getElementById('file-input').value = "";
   
+  const editorSection = document.getElementById('editor-section');
+  if (editorSection) {
+    editorSection.classList.add('hidden', 'opacity-0');
+    editorSection.classList.remove('flex');
+  }
+  
+  const uploadSection = document.getElementById('upload-section');
+  if (uploadSection) {
+    uploadSection.classList.remove('hidden');
+  }
+  
   const studioHeader = document.getElementById('studio-header');
-  if (studioHeader) studioHeader.classList.remove('hidden');
-  
-  const step2 = document.getElementById('step-2');
-  if (step2) {
-    step2.classList.add('hidden', 'opacity-0', 'translate-y-4');
-    step2.classList.remove('flex');
-  }
-  const step3 = document.getElementById('step-3');
-  if (step3) {
-    step3.classList.add('hidden', 'opacity-0', 'translate-y-4');
-    step3.classList.remove('flex');
-  }
-  
-  const step1 = document.getElementById('step-1');
-  if (step1) {
-    step1.classList.remove('hidden');
+  if (studioHeader) {
+    studioHeader.classList.remove('hidden');
   }
   
   if (webglFilter) {
