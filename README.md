@@ -1,29 +1,25 @@
 # Visionary 📸
 
 Visionary 是一個現代化的網頁版影像濾鏡與社群分享平台。
-專為攝影愛好者設計，讓您能夠輕鬆套用電影級的調色濾鏡、預覽效果，並與社群分享您的專屬配方。
+專為攝影愛好者設計，讓您能夠輕鬆套用電影級的調色濾鏡、即時預覽效果，並與社群分享您的專屬配方。
 
-## 🌟 核心功能 (Features)
+## 🌟 最新升級特色 (Latest Features)
 
-### 1. Studio 專業調色室
-- **WebGL LUT 渲染引擎**：使用高效能的 WebGL 技術，瞬間套用電影級的 3D LUT 色彩對應表。
-- **內建系統濾鏡**：包含 Golden Hour (黃金時刻)、Midnight Neon (午夜霓虹)、Wong Kar-wai (王家衛風格)、Sakura Dream (櫻花夢境) 等高品質預設。
-- **Before/After 互動滑桿**：絲滑的對比滑桿，讓您即時查看原圖與套用濾鏡後的差異。
-- **快速發布 (Publish)**：將滿意的調色配方與預覽圖，一鍵發布到雲端社群資料庫。發布前會自動在客戶端將圖片壓縮至最大 800px，確保上傳速度極快。
+### 1. 專業調色室 (Studio) - Workspace-First 全新介面
+- **WebGL 3D LUT 渲染引擎**：支援標準的 **HaldCLUT (.png)** 與 **.cube** 色彩對應表，提供專業級的精準色彩映射。
+- **支援 RAW 檔解析**：可以直接拖曳或貼上 `CR2`, `NEF`, `ARW`, `DNG` 等單眼相機 RAW 原始檔進行處理。
+- **無延遲 Before/After 對比**：透過精心設計的觸控友善滑桿，隨時查看套用濾鏡前後的視覺差異。
+- **100% 本地運算**：您的照片**完全不會上傳到任何伺服器**，所有渲染與解析都在您的設備（瀏覽器）本地端瞬間完成，保障絕對隱私。
 
-### 2. Explore 社群探索牆
-- **動態瀑布流**：瀏覽來自全球使用者的精彩調色作品。
-- **一鍵試用 (Try Preset)**：看到喜歡的色調？點擊「Try Preset」即可把別人的配方直接帶回您的 Studio，套用到自己的照片上！
-- **極速前端快取**：實作了 3 分鐘的前端快取 (Client-side Cache) 機制。在 Studio 與 Explore 之間頻繁切換時能實現「零延遲」秒開，且大幅節省資料庫讀取成本。
+### 2. 探索大師作品 (Explore Community)
+- **動態瀑布流**：探索全球攝影師上傳的專屬調色配方。
+- **一鍵試用 (Try Preset)**：看到喜歡的色調，只需點擊「Try Preset」就能把大師的配方直接帶回工作室，完美套用在自己的照片上。
+- **極速前端快取機制**：在 Studio 與 Explore 之間頻繁切換時實現「零延遲」秒開，大幅節省網路成本。
 
-### 3. 會員與權限系統
-- **Supabase 整合**：完整的註冊、登入與狀態管理，保障資料安全。
-- **RLS 安全策略**：透過 Row Level Security (RLS) 保護 `community_posts` 資料表，防範惡意寫入。
-
-### 4. 🕵️ 開發者彩蛋 (Mock RBAC System)
-- **彩蛋啟動**：連續點擊左上角「Visionary.」Logo 5 下，即可啟動隱藏的**管理員測試沙盒 (Mock System)**。
-- **MSW (Mock Service Worker)**：前端完全攔截 API 請求，無需真實後端即可模擬登入。
-- **RBAC (角色存取控制)**：實作路由守衛 (Route Guards)，嚴格隔離 `admin` 與 `user` 的存取權限。無 Token 者會被踢回登入頁，一般用戶無法闖入後台。
+### 3. PWA 與行動端深度優化 (Mobile-First)
+- **Progressive Web App**：支援安裝到手機桌面，享受全螢幕、無邊框的沉浸式 App 體驗。
+- **手勢與震動回饋**：整合了 Haptics 震動回饋與手勢操作，提供真實 App 般的操控手感。
+- **智慧排版系統**：針對手機畫面進行高度最佳化，包括底部導航列與獨立的 About 資訊頁。
 
 ---
 
@@ -31,7 +27,7 @@ Visionary 是一個現代化的網頁版影像濾鏡與社群分享平台。
 
 *   **前端框架**: Vanilla JavaScript (ES6 Modules)
 *   **建置工具**: Vite
-*   **樣式與 UI**: Tailwind CSS, 玻璃擬物化設計 (Glassmorphism), RWD 響應式佈局 (包含手機底部導航列)
+*   **樣式與 UI**: Tailwind CSS, 玻璃擬物化設計 (Glassmorphism), RWD 響應式佈局
 *   **圖示庫**: Lucide Icons
 *   **影像處理**: WebGL, HTML5 Canvas API
 *   **後端即服務 (BaaS)**: Supabase (PostgreSQL, Auth, Storage)
@@ -41,8 +37,8 @@ Visionary 是一個現代化的網頁版影像濾鏡與社群分享平台。
 
 ## 🚀 系統架構演進史 (Architecture Evolutions)
 
-在開發過程中，為了解決效能與體驗問題，我們進行了以下架構升級：
-1. **圖片處理優化**：為解決上傳高解析度照片導致的卡頓，在送出前於 Canvas 層級進行 800px 智慧縮圖。
-2. **資料庫讀取優化**：移除了耗能的 `SELECT *`，改為精準抓取欄位，並為 `created_at` 建立 Index 以優化排序查詢速度。
-3. **前端記憶體快取 (Cache)**：為 Explore 頁面導入快取保溫桶，避免切換分頁時的冗餘 API 呼叫。
-4. **狀態管理重構**：修復了 `handleFileUpload` 中覆蓋使用者自訂社群濾鏡的 Bug，確保操作邏輯連貫。
+在開發過程中，為了解決效能與極致的使用者體驗，我們進行了以下技術攻關：
+1. **WebGL 降級容錯機制**：修復了 iOS Safari 某些環境下 WebGL 精度導致的「黑畫面」問題，並實作 CSS Filter 的完美降級方案 (Fallback)。
+2. **記憶體管理最佳化**：移除了導致 Safari 當機的 WebWorker 壓縮程序，改採同步的輕量化縮圖策略，徹底解決手機端記憶體爆表問題。
+3. **Workspace-First UI 重構**：拋棄了傳統的繁瑣介紹首頁，採用現代 SaaS 常見的「工作區優先」設計，使用者一進入就能立刻開始拖曳修圖。
+4. **資料庫讀取優化**：移除了耗能的 `SELECT *`，改為精準抓取欄位，並為 `created_at` 建立 Index 以優化排序查詢速度。
